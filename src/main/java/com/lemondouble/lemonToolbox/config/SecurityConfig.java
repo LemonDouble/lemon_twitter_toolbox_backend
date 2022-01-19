@@ -11,9 +11,10 @@ import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.filter.CorsFilter;
 
 // Web security 관련 설정
 @EnableWebSecurity
@@ -22,15 +23,18 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     private final TokenProvider tokenProvider;
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
     private final JwtAccessDeniedHandler jwtAccessDeniedHandler;
+    private final CorsFilter corsFilter;
 
     public SecurityConfig(
             TokenProvider tokenProvider,
             JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint,
-            JwtAccessDeniedHandler jwtAccessDeniedHandler
+            JwtAccessDeniedHandler jwtAccessDeniedHandler,
+            CorsFilter corsFilter
     ){
         this.tokenProvider = tokenProvider;
         this.jwtAuthenticationEntryPoint = jwtAuthenticationEntryPoint;
         this.jwtAccessDeniedHandler = jwtAccessDeniedHandler;
+        this.corsFilter = corsFilter;
     }
 
     @Bean
@@ -44,6 +48,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         http
                 // Token 사용하므로 disable 해 주고,
                 .csrf().disable()
+
+                // CORS 필터 설정
+                .addFilterBefore(corsFilter, UsernamePasswordAuthenticationFilter.class)
 
                 //exceptionHandler 직접 만든 jwtHandler 추가
                 .exceptionHandling()
