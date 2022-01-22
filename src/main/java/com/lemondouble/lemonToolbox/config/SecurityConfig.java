@@ -74,7 +74,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/api/hello").permitAll()
                 .antMatchers("/api/authenticate").permitAll()
                 .antMatchers("/api/signup").permitAll()
-
+                .antMatchers("/api/oauth/**").permitAll()
                 .anyRequest().authenticated()
 
                 // JWT filter 적용한 JwtSecurityConfig 클래스 적용
