@@ -2,9 +2,11 @@ package com.lemondouble.lemonToolbox.api.controller;
 
 import com.lemondouble.lemonToolbox.api.dto.UserDto;
 import com.lemondouble.lemonToolbox.api.service.UserService;
-import com.lemondouble.lemonToolbox.entity.User;
+import com.lemondouble.lemonToolbox.api.repository.entity.User;
+import com.lemondouble.lemonToolbox.jwt.TokenProvider;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -18,6 +20,7 @@ public class UserController {
         this.userService = userService;
     }
 
+    /*
     @PostMapping("/signup")
     public ResponseEntity<User> signup(
             @Valid @RequestBody UserDto userDto
@@ -25,15 +28,5 @@ public class UserController {
         return ResponseEntity.ok(userService.signup(userDto));
     }
 
-    @PreAuthorize("hasAnyRole('USER','ADMIN')")
-    @GetMapping("/user")
-    public ResponseEntity<User> getMyUserInfo(){
-        return ResponseEntity.ok(userService.getMyUserWithAuthorities().get());
-    }
-
-    @PreAuthorize("hasAnyRole('ADMIN')")
-    @GetMapping("/user/{username}")
-    public ResponseEntity<User> getUserInfo(@PathVariable String username){
-        return ResponseEntity.ok(userService.getUserWithAuthorities(username).get());
-    }
+     */
 }

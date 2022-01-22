@@ -1,10 +1,7 @@
 package com.lemondouble.lemonToolbox.api.service;
 
-import com.lemondouble.lemonToolbox.api.dto.UserDto;
 import com.lemondouble.lemonToolbox.api.repository.UserRepository;
-import com.lemondouble.lemonToolbox.api.util.SecurityUtil;
-import com.lemondouble.lemonToolbox.entity.Authority;
-import com.lemondouble.lemonToolbox.entity.User;
+import com.lemondouble.lemonToolbox.api.repository.entity.User;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,6 +19,7 @@ public class UserService {
         this.passwordEncoder = passwordEncoder;
     }
 
+    /*
     @Transactional
     public User signup(UserDto userDto){
         // DB에 User 있는지 확인
@@ -44,17 +42,21 @@ public class UserService {
                 .build();
 
         return userRepository.save(user);
+
     }
+    */
 
     // username 파라미터를 주면, 해당 유저의 정보를 가져옴
     @Transactional(readOnly = true)
-    public Optional<User> getUserWithAuthorities(String username){
-        return userRepository.findOneWithAuthoritiesByUsername(username);
+    public Optional<User> getUserWithAuthorities(Long userId){
+        return userRepository.findById(userId);
     }
 
+    /*
     // securityContext에 저장된 username 의 정보를 가져옴
     @Transactional(readOnly = true)
     public Optional<User> getMyUserWithAuthorities(){
         return SecurityUtil.getCurrentUsername().flatMap(userRepository::findOneWithAuthoritiesByUsername);
     }
+    */
 }
