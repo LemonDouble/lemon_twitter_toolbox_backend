@@ -1,7 +1,6 @@
 package com.lemondouble.lemonToolbox.api.service;
 
-import com.lemondouble.lemonToolbox.api.dto.TokenDto;
-import com.lemondouble.lemonToolbox.api.dto.TwitterAccessTokenDto;
+import com.lemondouble.lemonToolbox.api.dto.OAuth.TwitterAccessTokenDto;
 import com.lemondouble.lemonToolbox.api.repository.OAuthTokenRepository;
 import com.lemondouble.lemonToolbox.api.repository.UserRepository;
 import com.lemondouble.lemonToolbox.api.repository.entity.OAuthToken;
@@ -10,7 +9,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
 import twitter4j.TwitterFactory;
@@ -42,6 +40,7 @@ public class TwitterOauthService {
         this.userRepository = userRepository;
     }
 
+    // Request Token : OAUTH 1.0a 로그인을 위한 첫 단계, Login 위한 URL 등 정보 담고 있다.
     public RequestToken getRequestToken() throws TwitterException {
         Twitter twitterInstance = getTwitterInstance();
         return twitterInstance.getOAuthRequestToken();
@@ -62,7 +61,7 @@ public class TwitterOauthService {
 
         TwitterAccessTokenDto twitterAccessTokenDto = parseToAccessToken(responseBodyString);
 
-        return new AccessToken(twitterAccessTokenDto.getAccess_token(), twitterAccessTokenDto.getAccess_token_secret());
+        return new AccessToken(twitterAccessTokenDto.getAccessToken(), twitterAccessTokenDto.getAccessTokenSecret());
     }
 
     private TwitterAccessTokenDto parseToAccessToken(String responseBodyString) throws TwitterException {
@@ -73,14 +72,17 @@ public class TwitterOauthService {
         }
 
         TwitterAccessTokenDto twitterAccessTokenDto = new TwitterAccessTokenDto();
-        twitterAccessTokenDto.setAccess_token(split[0].split("=")[1]);
-        twitterAccessTokenDto.setAccess_token_secret(split[1].split("=")[1]);
-        twitterAccessTokenDto.setUser_id(split[2].split("=")[1]);
-        twitterAccessTokenDto.setScreen_name(split[3].split("=")[1]);
+        twitterAccessTokenDto.setAccessToken(split[0].split("=")[1]);
+        twitterAccessTokenDto.setAccessTokenSecret(split[1].split("=")[1]);
+        twitterAccessTokenDto.setUserId(split[2].split("=")[1]);
+        twitterAccessTokenDto.setScreenName(split[3].split("=")[1]);
 
         return twitterAccessTokenDto;
     }
 
+
+    // Access Token 바탕으로 우리 서비스의 User Entity를 리턴.
+    // 만약 Access Token이 최신화되어 있지 않다면, Access Token을 최신화한다.
     @Transactional
     public Optional<User> findUserByAccessToken(AccessToken accessToken){
         List<OAuthToken> OAuthList = oAuthTokenRepository.findByOauthTypeAndOauthUserId(OAUTH_TYPE, accessToken.getUserId());
@@ -89,17 +91,31 @@ public class TwitterOauthService {
         }
 
         if(OAuthList.size() != 1){
-            throw new RuntimeException("findByOauthTypeAndOAuthUserId 관련 에러! DB 무결성에 오류 생겼음!");
+            throw new RuntimeException("findByOauthTypeAndOAuthUserId Error! OAUTH_TYPE = " + OAUTH_TYPE + " , " + "userId = " + accessToken.getUserId());
+        }
+
+        // 만약 유저가 트위터에서 Access Token 을 Revoke 했다면, Access Token 값이 다를 수 있다.
+        // 이 경우에는 새로 받아온 Access Token으로 최신화 해 준다.
+
+        String token = accessToken.getToken();
+        String tokenSecret = accessToken.getTokenSecret();
+
+        if(!OAuthList.get(0).getAccessToken().equals(token) || !OAuthList.get(0).getAccessTokenSecret().equals(tokenSecret)){
+            OAuthList.get(0).setAccessToken(token);
+            OAuthList.get(0).setAccessTokenSecret(token);
         }
 
         return Optional.ofNullable(OAuthList.get(0).getUser());
     }
 
+    // 회원가입 되어 있지 않다면, Access Token을 바탕으로 새로 회원가입.
+    // User 객체 만들고, OAuthToken 연결시킨다.
     @Transactional
     public User registerByAccessToken(AccessToken accessToken){
         // 유저 먼저 회원가입
         User user = new User();
         User savedUser = userRepository.save(user);
+
 
         OAuthToken oAuthToken = new OAuthToken(OAUTH_TYPE, accessToken.getToken(), accessToken.getTokenSecret(), accessToken.getUserId(), savedUser);
         oAuthTokenRepository.save(oAuthToken);

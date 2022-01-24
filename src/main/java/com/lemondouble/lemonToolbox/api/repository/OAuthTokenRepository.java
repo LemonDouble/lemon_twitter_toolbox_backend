@@ -8,4 +8,5 @@ import java.util.List;
 
 public interface OAuthTokenRepository extends JpaRepository<OAuthToken, Long> {
     List<OAuthToken> findByOauthTypeAndOauthUserId(String oauthType, Long oauthUserId);
+    List<OAuthToken> findByOauthTypeAndUserId(String oauthType, Long userId);
 }

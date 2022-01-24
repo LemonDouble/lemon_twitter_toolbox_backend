@@ -1,4 +1,4 @@
-package com.lemondouble.lemonToolbox.api.dto;
+package com.lemondouble.lemonToolbox.api.dto.OAuth;
 
 import lombok.*;
 

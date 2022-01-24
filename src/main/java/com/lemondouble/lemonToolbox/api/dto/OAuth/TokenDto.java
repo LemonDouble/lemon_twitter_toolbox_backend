@@ -1,4 +1,4 @@
-package com.lemondouble.lemonToolbox.api.dto;
+package com.lemondouble.lemonToolbox.api.dto.OAuth;
 
 import lombok.*;
 
@@ -8,5 +8,5 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 public class TokenDto {
-    private String token;
+    private String accessToken;
 }

@@ -1,8 +1,7 @@
 package com.lemondouble.lemonToolbox.api.controller;
 
-import com.lemondouble.lemonToolbox.api.dto.TokenDto;
-import com.lemondouble.lemonToolbox.api.dto.TwitterAccessTokenDto;
-import com.lemondouble.lemonToolbox.api.dto.TwitterRequestOauthTokenDto;
+import com.lemondouble.lemonToolbox.api.dto.OAuth.TokenDto;
+import com.lemondouble.lemonToolbox.api.dto.OAuth.TwitterRequestOauthTokenDto;
 import com.lemondouble.lemonToolbox.api.repository.entity.User;
 import com.lemondouble.lemonToolbox.api.service.TwitterOauthService;
 import com.lemondouble.lemonToolbox.jwt.JwtFilter;
@@ -16,6 +15,7 @@ import twitter4j.TwitterException;
 import twitter4j.auth.AccessToken;
 import twitter4j.auth.RequestToken;
 
+import javax.servlet.http.HttpServletResponse;
 import java.util.Optional;
 
 @RestController
@@ -24,12 +24,10 @@ public class OAuthController {
 
     private final TwitterOauthService twitterOauthService;
     private final TokenProvider tokenProvider;
-    private final AuthenticationManagerBuilder authenticationManagerBuilder;
 
     public OAuthController(TwitterOauthService twitterOauthService, TokenProvider tokenProvider, AuthenticationManagerBuilder authenticationManagerBuilder) {
         this.twitterOauthService = twitterOauthService;
         this.tokenProvider = tokenProvider;
-        this.authenticationManagerBuilder = authenticationManagerBuilder;
     }
 
     @GetMapping("/request-token")
@@ -40,12 +38,13 @@ public class OAuthController {
 
     @PostMapping("/twitter-login")
     public ResponseEntity<TokenDto> authorize(
-            @RequestBody TwitterRequestOauthTokenDto twitterRequestOauthTokenDto) throws TwitterException {
+            @RequestBody TwitterRequestOauthTokenDto twitterRequestOauthTokenDto,
+            HttpServletResponse response) throws TwitterException {
 
         // 보내준 OAuth Token 이용해 Access Token 받아온다.
         AccessToken accessToken = twitterOauthService.getAccessTokenFromOAuthToken(
-                twitterRequestOauthTokenDto.getOauth_token(),
-                twitterRequestOauthTokenDto.getOauth_verifier());
+                twitterRequestOauthTokenDto.getOauthToken(),
+                twitterRequestOauthTokenDto.getOauthVerifier());
 
         User registeredUser;
 

@@ -25,7 +25,7 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 
 	// https://mvnrepository.com/artifact/org.twitter4j/twitter4j-core
-	implementation group: 'org.twitter4j', name: 'twitter4j-core', version: '4.0.1'
+	implementation group: 'org.twitter4j', name: 'twitter4j-core', version: '4.0.7'
 
 	//WebClient
 	implementation 'org.springframework.boot:spring-boot-starter-webflux'
