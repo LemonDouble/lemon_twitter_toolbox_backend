@@ -31,8 +31,8 @@ public class TwitterController {
                 .screenName(currentUser.getScreenName())
                 .screenNickname(currentUser.getName())
                 .userBio(currentUser.getDescription())
-                .profileImageURL(currentUser.getProfileImageURL())
-                .bannerImageURL(currentUser.getProfileBannerURL())
+                .profileImageURL(currentUser.get400x400ProfileImageURLHttps())
+                .bannerImageURL(currentUser.getProfileBanner1500x500URL())
                 .build();
     }
 
