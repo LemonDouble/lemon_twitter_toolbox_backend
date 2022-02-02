@@ -1,5 +1,6 @@
 package com.lemondouble.lemonToolbox.api.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.lemondouble.lemonToolbox.api.dto.kafka.TestDto;
 import com.lemondouble.lemonToolbox.api.service.SqsMessageService;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,7 +19,7 @@ public class TestController {
     }
 
     @GetMapping("/test")
-    public void hello() throws TwitterException {
+    public void hello() throws TwitterException, JsonProcessingException {
         sqsMessageService.sendMessage();
     }
 
