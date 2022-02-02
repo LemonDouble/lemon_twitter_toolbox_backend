@@ -6,12 +6,10 @@ import com.lemondouble.lemonToolbox.api.repository.entity.OAuthToken;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
-import twitter4j.Twitter;
-import twitter4j.TwitterException;
-import twitter4j.TwitterFactory;
-import twitter4j.User;
+import twitter4j.*;
 import twitter4j.auth.AccessToken;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -37,12 +35,28 @@ public class TwitterUserService {
         this.userRepository = userRepository;
     }
 
+    /*
+    public List<Status> getUserTweetUntilLimits(Long userId) throws TwitterException {
+        Twitter twitter = getCredentialTwitterInstanceByUserId(userId);
+        List<Status> result = new ArrayList<>();
+        for(int i = 1; i <= 40; i++){
+            result.addAll(twitter.getMentionsTimeline(new Paging(i)));
+        }
+        return result;
+    }
+     */
 
     // Twitter4j의 User 객체를 우리 서비스의 User id 통해 반환
     public User getTwitterUserByUserId(Long userId) throws TwitterException {
         OAuthToken oAuthToken = getOAuthTokenByUserId(userId);
         Twitter loginedTwitter = getCredentialTwitterInstanceByOAuthToken(oAuthToken);
         return loginedTwitter.showUser(oAuthToken.getOauthUserId());
+    }
+
+    // Twitter4j의 Twitter 객체를 우리 서비스의 User id 통해 반환
+    public Twitter getCredentialTwitterInstanceByUserId(Long userId) throws TwitterException {
+        OAuthToken oAuthToken = getOAuthTokenByUserId(userId);
+        return getCredentialTwitterInstanceByOAuthToken(oAuthToken);
     }
 
     // 유저 ID 기반으로 OAuthToken 객체를 리턴

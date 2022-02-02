@@ -8,7 +8,7 @@ import lombok.Data;
 @Builder
 @AllArgsConstructor
 public class TestDto {
-    private String topicName;
-    private String someData;
-    private Integer someInt;
+    private String AccessKey;
+    private String AccessSecret;
+    private Long userId;
 }

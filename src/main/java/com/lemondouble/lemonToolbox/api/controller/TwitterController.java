@@ -24,7 +24,7 @@ public class TwitterController {
     @GetMapping("/user-profile")
     public TwitterProfileDto getProfileURL() throws TwitterException {
 
-        Long currentUserId = getCurrentUserId();
+        Long currentUserId = SecurityUtil.getCurrentUserId().orElseThrow(()-> new RuntimeException("인증 Error, 현재 유저를 찾을 수 없습니다!"));
         User currentUser = twitterUserService.getTwitterUserByUserId(currentUserId);
 
         return TwitterProfileDto.builder()
@@ -34,15 +34,5 @@ public class TwitterController {
                 .profileImageURL(currentUser.get400x400ProfileImageURLHttps())
                 .bannerImageURL(currentUser.getProfileBanner1500x500URL())
                 .build();
-    }
-
-    private Long getCurrentUserId(){
-        Optional<String> currentUserString = SecurityUtil.getCurrentUsername();
-
-        if(currentUserString.isEmpty()){
-            throw new RuntimeException("User ID가 없습니다! Cookie 관련 Error!");
-        }
-
-        return Long.parseLong(currentUserString.get());
     }
 }
