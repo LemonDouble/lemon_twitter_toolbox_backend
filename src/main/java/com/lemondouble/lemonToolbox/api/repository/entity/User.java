@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table
+@Table(name = "SERVICE_USER")
 @Getter @Setter @AllArgsConstructor @NoArgsConstructor
 public class User {
 

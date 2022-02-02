@@ -71,7 +71,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 // /api/hello, authenticate, signup 만 허용, 나머지는 비허용
                 .and()
                 .authorizeRequests()
-                .antMatchers("/api/hello").permitAll()
+                .antMatchers("/api/test").permitAll()
                 .antMatchers("/api/authenticate").permitAll()
                 .antMatchers("/api/signup").permitAll()
                 .antMatchers("/api/oauth/**").permitAll()

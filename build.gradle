@@ -28,14 +28,18 @@ dependencies {
 	implementation group: 'org.twitter4j', name: 'twitter4j-core', version: '4.0.7'
 
 	//WebClient
-	implementation 'org.springframework.boot:spring-boot-starter-webflux'
+	implementation 'org.springframework.boot:spring-boot-starter-webflux:2.6.3'
 
-	compileOnly 'org.projectlombok:lombok'
-	runtimeOnly 'com.h2database:h2'
-	runtimeOnly 'org.postgresql:postgresql'
-	annotationProcessor 'org.projectlombok:lombok'
-	testImplementation 'org.springframework.boot:spring-boot-starter-test'
-	testImplementation 'org.springframework.security:spring-security-test'
+	// AWS SQS
+	implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'
+	implementation 'org.springframework.cloud:spring-cloud-starter-aws-messaging:2.2.6.RELEASE'
+	implementation 'org.springframework.cloud:spring-cloud-aws-autoconfigure:2.2.6.RELEASE'
+
+	compileOnly 'org.projectlombok:lombok:1.18.22'
+	runtimeOnly 'com.h2database:h2:2.1.210'
+	annotationProcessor 'org.projectlombok:lombok:1.18.22'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test:2.6.3'
+	testImplementation 'org.springframework.security:spring-security-test:5.5.1'
 
 	implementation group : 'io.jsonwebtoken', name: 'jjwt-api', version: '0.11.2'
 	runtimeOnly group: 'io.jsonwebtoken', name: 'jjwt-impl', version: '0.11.2'
