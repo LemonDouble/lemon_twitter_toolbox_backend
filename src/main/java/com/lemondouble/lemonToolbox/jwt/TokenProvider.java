@@ -1,5 +1,6 @@
 package com.lemondouble.lemonToolbox.jwt;
 
+import com.lemondouble.lemonToolbox.api.repository.entity.ServiceUser;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
@@ -19,7 +20,6 @@ import java.security.Key;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
-import java.util.stream.Collectors;
 
 
 // Token 생성, 유효성 검증 등을 담당
@@ -48,7 +48,7 @@ public class TokenProvider implements InitializingBean {
     }
 
     // User 객체를 받아 JWT Token 생성
-    public String createToken(com.lemondouble.lemonToolbox.api.repository.entity.User user){
+    public String createToken(ServiceUser user){
 
         long now = (new Date()).getTime();
         Date validity = new Date(now + this.tokenValidityInMilliseconds);

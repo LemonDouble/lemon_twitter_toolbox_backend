@@ -1,12 +1,10 @@
 package com.lemondouble.lemonToolbox.jwt;
 
-import com.lemondouble.lemonToolbox.api.repository.entity.User;
+import com.lemondouble.lemonToolbox.api.repository.entity.ServiceUser;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.core.Authentication;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 class TokenProviderTest {
@@ -17,7 +15,7 @@ class TokenProviderTest {
     @Test
     public void createToken() throws Exception {
         //given
-        User createdUser = new User();
+        ServiceUser createdUser = new ServiceUser();
         createdUser.setId(1L);
 
         //when

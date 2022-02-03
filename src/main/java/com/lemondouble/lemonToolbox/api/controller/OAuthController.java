@@ -2,7 +2,7 @@ package com.lemondouble.lemonToolbox.api.controller;
 
 import com.lemondouble.lemonToolbox.api.dto.OAuth.TokenDto;
 import com.lemondouble.lemonToolbox.api.dto.OAuth.TwitterRequestOauthTokenDto;
-import com.lemondouble.lemonToolbox.api.repository.entity.User;
+import com.lemondouble.lemonToolbox.api.repository.entity.ServiceUser;
 import com.lemondouble.lemonToolbox.api.service.TwitterOauthService;
 import com.lemondouble.lemonToolbox.jwt.JwtFilter;
 import com.lemondouble.lemonToolbox.jwt.TokenProvider;
@@ -46,9 +46,9 @@ public class OAuthController {
                 twitterRequestOauthTokenDto.getOauthToken(),
                 twitterRequestOauthTokenDto.getOauthVerifier());
 
-        User registeredUser;
+        ServiceUser registeredUser;
 
-        Optional<User> userByAccessToken = twitterOauthService.findUserByAccessToken(accessToken);
+        Optional<ServiceUser> userByAccessToken = twitterOauthService.findUserByAccessToken(accessToken);
 
         // Access token과 매치되는 유저가 없는 경우 새로 회원가입 시킨다.
         if(userByAccessToken.isEmpty()){

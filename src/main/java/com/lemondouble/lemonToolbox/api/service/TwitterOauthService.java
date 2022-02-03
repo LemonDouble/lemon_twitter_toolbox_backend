@@ -2,9 +2,9 @@ package com.lemondouble.lemonToolbox.api.service;
 
 import com.lemondouble.lemonToolbox.api.dto.OAuth.TwitterAccessTokenDto;
 import com.lemondouble.lemonToolbox.api.repository.OAuthTokenRepository;
-import com.lemondouble.lemonToolbox.api.repository.UserRepository;
+import com.lemondouble.lemonToolbox.api.repository.ServiceUserRepository;
 import com.lemondouble.lemonToolbox.api.repository.entity.OAuthToken;
-import com.lemondouble.lemonToolbox.api.repository.entity.User;
+import com.lemondouble.lemonToolbox.api.repository.entity.ServiceUser;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,16 +28,16 @@ public class TwitterOauthService {
     private final TwitterFactory twitterFactory;
     private final WebClient webClient;
     private final OAuthTokenRepository oAuthTokenRepository;
-    private final UserRepository userRepository;
+    private final ServiceUserRepository serviceUserRepository;
 
     private static final String OAUTH_TYPE = "TWITTER";
 
 
-    public TwitterOauthService(OAuthTokenRepository oAuthTokenRepository, UserRepository userRepository) {
+    public TwitterOauthService(OAuthTokenRepository oAuthTokenRepository, ServiceUserRepository serviceUserRepository) {
         twitterFactory = new TwitterFactory();
         webClient = WebClient.builder().baseUrl("https://api.twitter.com").build();
         this.oAuthTokenRepository = oAuthTokenRepository;
-        this.userRepository = userRepository;
+        this.serviceUserRepository = serviceUserRepository;
     }
 
     // Request Token : OAUTH 1.0a 로그인을 위한 첫 단계, Login 위한 URL 등 정보 담고 있다.
@@ -84,7 +84,7 @@ public class TwitterOauthService {
     // Access Token 바탕으로 우리 서비스의 User Entity를 리턴.
     // 만약 Access Token이 최신화되어 있지 않다면, Access Token을 최신화한다.
     @Transactional
-    public Optional<User> findUserByAccessToken(AccessToken accessToken){
+    public Optional<ServiceUser> findUserByAccessToken(AccessToken accessToken){
         List<OAuthToken> OAuthList = oAuthTokenRepository.findByOauthTypeAndOauthUserId(OAUTH_TYPE, accessToken.getUserId());
         if(OAuthList.isEmpty()){
             return Optional.empty();
@@ -111,11 +111,10 @@ public class TwitterOauthService {
     // 회원가입 되어 있지 않다면, Access Token을 바탕으로 새로 회원가입.
     // User 객체 만들고, OAuthToken 연결시킨다.
     @Transactional
-    public User registerByAccessToken(AccessToken accessToken){
+    public ServiceUser registerByAccessToken(AccessToken accessToken){
         // 유저 먼저 회원가입
-        User user = new User();
-        User savedUser = userRepository.save(user);
-
+        ServiceUser user = new ServiceUser();
+        ServiceUser savedUser = serviceUserRepository.save(user);
 
         OAuthToken oAuthToken = new OAuthToken(OAUTH_TYPE, accessToken.getToken(), accessToken.getTokenSecret(), accessToken.getUserId(), savedUser);
         oAuthTokenRepository.save(oAuthToken);

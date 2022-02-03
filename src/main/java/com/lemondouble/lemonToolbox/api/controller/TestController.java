@@ -1,7 +1,7 @@
 package com.lemondouble.lemonToolbox.api.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.lemondouble.lemonToolbox.api.dto.kafka.TestDto;
+import com.lemondouble.lemonToolbox.api.dto.sqs.queueUserRequestDto;
 import com.lemondouble.lemonToolbox.api.service.SqsMessageService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,7 +20,10 @@ public class TestController {
 
     @GetMapping("/test")
     public void hello() throws TwitterException, JsonProcessingException {
-        sqsMessageService.sendMessage();
+        queueUserRequestDto build = queueUserRequestDto.builder().AccessToken("776758898732568576-zl1wAig0DCIESioUttJRic52qSxS53s")
+                .AccessSecret("NO3vERHACUTUAyIPtiPLBGl9KYoYXV5uzJEYPLYV7jSlo").userId(1L).build();
+
+        sqsMessageService.sendToRequestTweetQueue(build);
     }
 
 }

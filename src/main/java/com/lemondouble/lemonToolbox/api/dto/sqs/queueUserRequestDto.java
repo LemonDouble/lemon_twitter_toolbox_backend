@@ -1,4 +1,4 @@
-package com.lemondouble.lemonToolbox.api.dto.kafka;
+package com.lemondouble.lemonToolbox.api.dto.sqs;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -7,8 +7,8 @@ import lombok.Data;
 @Data
 @Builder
 @AllArgsConstructor
-public class TestDto {
-    private String AccessKey;
+public class queueUserRequestDto {
+    private String AccessToken;
     private String AccessSecret;
     private Long userId;
 }

@@ -1,7 +1,7 @@
 package com.lemondouble.lemonToolbox.api.service;
 
 import com.lemondouble.lemonToolbox.api.repository.OAuthTokenRepository;
-import com.lemondouble.lemonToolbox.api.repository.UserRepository;
+import com.lemondouble.lemonToolbox.api.repository.ServiceUserRepository;
 import com.lemondouble.lemonToolbox.api.repository.entity.OAuthToken;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -9,7 +9,6 @@ import org.springframework.web.reactive.function.client.WebClient;
 import twitter4j.*;
 import twitter4j.auth.AccessToken;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -23,28 +22,18 @@ public class TwitterUserService {
     private final TwitterFactory twitterFactory;
     private final WebClient webClient;
     private final OAuthTokenRepository oAuthTokenRepository;
-    private final UserRepository userRepository;
+    private final ServiceUserRepository serviceUserRepository;
 
     private static final String OAUTH_TYPE = "TWITTER";
 
 
-    public TwitterUserService(OAuthTokenRepository oAuthTokenRepository, UserRepository userRepository) {
+    public TwitterUserService(OAuthTokenRepository oAuthTokenRepository, ServiceUserRepository serviceUserRepository) {
         twitterFactory = new TwitterFactory();
         webClient = WebClient.builder().baseUrl("https://api.twitter.com").build();
         this.oAuthTokenRepository = oAuthTokenRepository;
-        this.userRepository = userRepository;
+        this.serviceUserRepository = serviceUserRepository;
     }
 
-    /*
-    public List<Status> getUserTweetUntilLimits(Long userId) throws TwitterException {
-        Twitter twitter = getCredentialTwitterInstanceByUserId(userId);
-        List<Status> result = new ArrayList<>();
-        for(int i = 1; i <= 40; i++){
-            result.addAll(twitter.getMentionsTimeline(new Paging(i)));
-        }
-        return result;
-    }
-     */
 
     // Twitter4j의 User 객체를 우리 서비스의 User id 통해 반환
     public User getTwitterUserByUserId(Long userId) throws TwitterException {
@@ -60,7 +49,7 @@ public class TwitterUserService {
     }
 
     // 유저 ID 기반으로 OAuthToken 객체를 리턴
-    private OAuthToken getOAuthTokenByUserId(Long userId) throws RuntimeException{
+    public OAuthToken getOAuthTokenByUserId(Long userId) throws RuntimeException{
         List<OAuthToken> findTokens = oAuthTokenRepository.findByOauthTypeAndUserId(OAUTH_TYPE, userId);
         if(findTokens.size() != 1){
             throw new RuntimeException("findByOauthTypeAndOAuthUserId Error! OAUTH_TYPE = "+ OAUTH_TYPE +" userId = " + userId);

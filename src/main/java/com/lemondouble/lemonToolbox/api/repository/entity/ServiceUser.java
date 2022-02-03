@@ -7,12 +7,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "SERVICE_USER")
+@Table
 @Getter @Setter @AllArgsConstructor @NoArgsConstructor
-public class User {
+public class ServiceUser {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "USER_ID")
+    @Column(name="SERVICE_USER_ID")
     private Long id;
 
     @Column(length = 50)

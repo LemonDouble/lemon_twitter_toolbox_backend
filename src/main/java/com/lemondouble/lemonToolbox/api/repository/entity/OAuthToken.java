@@ -1,6 +1,5 @@
 package com.lemondouble.lemonToolbox.api.repository.entity;
 
-import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -12,7 +11,7 @@ public class OAuthToken {
     protected OAuthToken() {
     }
 
-    public OAuthToken(String oauthType , String accessToken, String accessTokenSecret, Long oauthUserId, User user) {
+    public OAuthToken(String oauthType , String accessToken, String accessTokenSecret, Long oauthUserId, ServiceUser user) {
         this.oauthType = oauthType;
         this.accessToken = accessToken;
         this.accessTokenSecret = accessTokenSecret;
@@ -21,12 +20,11 @@ public class OAuthToken {
     }
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "OAUTH_ID")
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "USER_ID")
-    private User user;
+    @JoinColumn(name = "SERVICE_USER_ID")
+    private ServiceUser user;
 
     private String oauthType;
 
