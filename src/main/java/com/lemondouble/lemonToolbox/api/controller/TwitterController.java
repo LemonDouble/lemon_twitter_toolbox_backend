@@ -3,8 +3,8 @@ package com.lemondouble.lemonToolbox.api.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.lemondouble.lemonToolbox.api.dto.Twitter.TwitterProfileDto;
-import com.lemondouble.lemonToolbox.api.dto.sqs.queueUserRequestDto;
 import com.lemondouble.lemonToolbox.api.repository.entity.OAuthToken;
+import com.lemondouble.lemonToolbox.api.service.RegisteredServiceService;
 import com.lemondouble.lemonToolbox.api.service.SqsMessageService;
 import com.lemondouble.lemonToolbox.api.service.TwitterUserService;
 import com.lemondouble.lemonToolbox.api.util.SecurityUtil;
@@ -22,10 +22,12 @@ import twitter4j.User;
 public class TwitterController {
     private TwitterUserService twitterUserService;
     private final SqsMessageService sqsMessageService;
+    private RegisteredServiceService registeredServiceService;
 
-    public TwitterController(TwitterUserService twitterUserService, SqsMessageService sqsMessageService) {
+    public TwitterController(TwitterUserService twitterUserService, SqsMessageService sqsMessageService, RegisteredServiceService registeredServiceService) {
         this.twitterUserService = twitterUserService;
         this.sqsMessageService = sqsMessageService;
+        this.registeredServiceService = registeredServiceService;
     }
 
     @GetMapping("/user-profile")
@@ -43,19 +45,17 @@ public class TwitterController {
                 .build();
     }
 
-    // TODO : 어떤 서비스 가입중인지, Service Entity 추가하자
+    // TODO : 서비스 가입 두번 됨 수정해야됨!
     @PostMapping("service/learn_me")
     public ResponseEntity<Void> registerLearnMe() throws JsonProcessingException {
         Long currentId = getUserId();
 
-        OAuthToken oAuthToken = twitterUserService.getOAuthTokenByUserId(currentId);
-        queueUserRequestDto requestDto = queueUserRequestDto.builder()
-                .userId(oAuthToken.getOauthUserId())
-                .AccessToken(oAuthToken.getAccessToken())
-                .AccessSecret(oAuthToken.getAccessTokenSecret())
-                .build();
+        // 현재 유저를 learn Me 서비스에 가입시킨다
+        registeredServiceService.joinLearnMe(currentId);
 
-        sqsMessageService.sendToRequestTweetQueue(requestDto);
+        // 현재 유저의 oAuthToken으로 sqs Queue에 서비스 요청 날린다.
+        OAuthToken oAuthToken = twitterUserService.getOAuthTokenByUserId(currentId);
+        sqsMessageService.sendToRequestTweetQueue(oAuthToken);
 
         return new ResponseEntity<>(null, HttpStatus.CREATED);
     }

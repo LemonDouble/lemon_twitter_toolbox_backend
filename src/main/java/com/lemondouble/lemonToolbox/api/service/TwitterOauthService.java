@@ -105,7 +105,7 @@ public class TwitterOauthService {
             OAuthList.get(0).setAccessTokenSecret(token);
         }
 
-        return Optional.ofNullable(OAuthList.get(0).getUser());
+        return Optional.ofNullable(OAuthList.get(0).getServiceUser());
     }
 
     // 회원가입 되어 있지 않다면, Access Token을 바탕으로 새로 회원가입.
@@ -116,7 +116,14 @@ public class TwitterOauthService {
         ServiceUser user = new ServiceUser();
         ServiceUser savedUser = serviceUserRepository.save(user);
 
-        OAuthToken oAuthToken = new OAuthToken(OAUTH_TYPE, accessToken.getToken(), accessToken.getTokenSecret(), accessToken.getUserId(), savedUser);
+        OAuthToken oAuthToken = OAuthToken.builder()
+                .oauthType(OAUTH_TYPE)
+                .accessToken(accessToken.getToken())
+                .accessTokenSecret(accessToken.getTokenSecret())
+                .oauthUserId(accessToken.getUserId())
+                .serviceUser(savedUser).build();
+
+
         oAuthTokenRepository.save(oAuthToken);
 
         return savedUser;

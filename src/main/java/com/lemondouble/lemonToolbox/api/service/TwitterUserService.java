@@ -50,7 +50,7 @@ public class TwitterUserService {
 
     // 유저 ID 기반으로 OAuthToken 객체를 리턴
     public OAuthToken getOAuthTokenByUserId(Long userId) throws RuntimeException{
-        List<OAuthToken> findTokens = oAuthTokenRepository.findByOauthTypeAndUserId(OAUTH_TYPE, userId);
+        List<OAuthToken> findTokens = oAuthTokenRepository.findByOauthTypeAndServiceUserId(OAUTH_TYPE, userId);
         if(findTokens.size() != 1){
             throw new RuntimeException("findByOauthTypeAndOAuthUserId Error! OAUTH_TYPE = "+ OAUTH_TYPE +" userId = " + userId);
         }

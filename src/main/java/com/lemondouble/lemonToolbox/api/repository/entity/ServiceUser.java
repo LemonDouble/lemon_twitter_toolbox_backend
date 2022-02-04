@@ -7,8 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table
-@Getter @Setter @AllArgsConstructor @NoArgsConstructor
+@Getter @Setter @AllArgsConstructor @NoArgsConstructor @Builder
 public class ServiceUser {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -18,6 +17,12 @@ public class ServiceUser {
     @Column(length = 50)
     private String nickname;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE)
+
+    @Builder.Default
+    @OneToMany(mappedBy = "serviceUser", cascade = CascadeType.REMOVE, fetch = FetchType.LAZY)
     private List<OAuthToken> oAuthTokens = new ArrayList<>();
+
+    @Builder.Default
+    @OneToMany(mappedBy = "serviceUser", cascade = CascadeType.REMOVE, fetch = FetchType.LAZY)
+    private List<RegisteredService> registeredServices = new ArrayList<>();
 }

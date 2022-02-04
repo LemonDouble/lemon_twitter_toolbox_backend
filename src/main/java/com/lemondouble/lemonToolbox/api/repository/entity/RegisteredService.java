@@ -5,8 +5,8 @@ import lombok.*;
 import javax.persistence.*;
 
 @Entity
-@Getter @Setter @Builder @AllArgsConstructor @NoArgsConstructor
-public class OAuthToken {
+@Getter @Setter @AllArgsConstructor @NoArgsConstructor @Builder
+public class RegisteredService {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -15,12 +15,6 @@ public class OAuthToken {
     @JoinColumn(name = "SERVICE_USER_ID")
     private ServiceUser serviceUser;
 
-    private String oauthType;
-
-    private String accessToken;
-
-    private String accessTokenSecret;
-
-    @Column(unique = true)
-    private Long oauthUserId;
+    @Enumerated(EnumType.STRING)
+    private ServiceType serviceType;
 }

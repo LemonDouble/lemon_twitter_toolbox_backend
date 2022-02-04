@@ -6,6 +6,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.lemondouble.lemonToolbox.api.dto.sqs.queueUserRequestDto;
+import com.lemondouble.lemonToolbox.api.repository.entity.OAuthToken;
 import org.springframework.cloud.aws.messaging.core.QueueMessagingTemplate;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
@@ -22,8 +23,14 @@ public class SqsMessageService {
         this.objectMapper = new ObjectMapper().setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE);
     }
 
-    public void sendToRequestTweetQueue(queueUserRequestDto queueUserRequestDto) throws JsonProcessingException {
-        Message<String> message = dtoToMessage(queueUserRequestDto);
+    public void sendToRequestTweetQueue(OAuthToken RequestUserOAuthToken) throws JsonProcessingException {
+        queueUserRequestDto requestDto = queueUserRequestDto.builder()
+                .userId(RequestUserOAuthToken.getOauthUserId())
+                .AccessToken(RequestUserOAuthToken.getAccessToken())
+                .AccessSecret(RequestUserOAuthToken.getAccessTokenSecret())
+                .build();
+
+        Message<String> message = dtoToMessage(requestDto);
         queueMessagingTemplate.send("TweetGetRequestQueue", message);
     }
 
