@@ -4,7 +4,7 @@ import com.amazonaws.services.sqs.AmazonSQS;
 import com.amazonaws.services.sqs.AmazonSQSAsync;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.lemondouble.lemonToolbox.api.dto.sqs.queueUserRequestDto;
 import com.lemondouble.lemonToolbox.api.repository.entity.OAuthToken;
 import org.springframework.cloud.aws.messaging.core.QueueMessagingTemplate;
@@ -20,7 +20,7 @@ public class SqsMessageService {
 
     public SqsMessageService(AmazonSQS amazonSQS) {
         this.queueMessagingTemplate = new QueueMessagingTemplate((AmazonSQSAsync) amazonSQS);
-        this.objectMapper = new ObjectMapper().setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE);
+        this.objectMapper = new ObjectMapper().setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE);
     }
 
     public void sendToRequestTweetQueue(OAuthToken RequestUserOAuthToken) throws JsonProcessingException {
