@@ -8,6 +8,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import twitter4j.TwitterException;
 
+
+// 개발용 테스트용 Controller!
+
 @RestController
 @RequestMapping("/api")
 public class TestController {

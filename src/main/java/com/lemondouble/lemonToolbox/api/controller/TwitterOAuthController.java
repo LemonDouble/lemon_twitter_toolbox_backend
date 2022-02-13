@@ -9,7 +9,6 @@ import com.lemondouble.lemonToolbox.jwt.TokenProvider;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.web.bind.annotation.*;
 import twitter4j.TwitterException;
 import twitter4j.auth.AccessToken;
@@ -19,29 +18,42 @@ import javax.servlet.http.HttpServletResponse;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/api/oauth")
-public class OAuthController {
+@RequestMapping("/api/oauth/twitter")
+public class TwitterOAuthController {
 
     private final TwitterOauthService twitterOauthService;
     private final TokenProvider tokenProvider;
 
-    public OAuthController(TwitterOauthService twitterOauthService, TokenProvider tokenProvider, AuthenticationManagerBuilder authenticationManagerBuilder) {
+    public TwitterOAuthController(TwitterOauthService twitterOauthService, TokenProvider tokenProvider) {
         this.twitterOauthService = twitterOauthService;
         this.tokenProvider = tokenProvider;
     }
 
+    /**
+     * OAuth 1.0a에선 처음 로그인 할 때, 해당 App provider 의 Consumer token, secret 이용해 Request Token을 발급받고,
+     * 유저가 해당 Request Token 들고 로그인 해야 한다. <br>
+     * 해당 Request Token을 발급해 준다. Front 기준으로는, SNS Login URL을 얻을 수 있다.
+     */
     @GetMapping("/request-token")
     public RequestToken getRequestToken() throws TwitterException {
         return twitterOauthService.getRequestToken();
     }
 
 
+    /**
+     * 유저가, 발급해준 Request Token 에서 트위터 로그인에 성공했다면 oauthToken, Verifier 를 받아 올 수 있다. <br>
+     * 해당 token 과 Verifier 를 이용, Twitter 인증 서버에 가서 해당 유저의 Access Token 과 Secret 받아올 수 있다. <br>
+     * Access Token 과 Secret 은 이후 여러 SNS 작업을 할 때 사용되므로 DB에 저장해 둔다. <br>
+     * 또한 만약 해당 유저가 우리 서비스에 가입되지 않았다면, 자동으로 해당 Token 기반으로 회원가입 시킨다. <br>
+     * (이후 여러 SNS 지원하게 되면, 한 유저에 여러 SNS 연동할 수도 있으므로) <br>
+     * 마지막으로, 로그인 시 필요한 JWT TOKEN을 발급해 준다.
+     */
     @PostMapping("/twitter-login")
     public ResponseEntity<TokenDto> authorize(
             @RequestBody TwitterRequestOauthTokenDto twitterRequestOauthTokenDto,
             HttpServletResponse response) throws TwitterException {
 
-        // 보내준 OAuth Token 이용해 Access Token 받아온다.
+        // 받은 OAuth Token 이용해 Access Token 받아온다.
         AccessToken accessToken = twitterOauthService.getAccessTokenFromOAuthToken(
                 twitterRequestOauthTokenDto.getOauthToken(),
                 twitterRequestOauthTokenDto.getOauthVerifier());
@@ -57,6 +69,7 @@ public class OAuthController {
             registeredUser = userByAccessToken.get();
         }
 
+        // 로그인용 JWT TOKEN 생성
         String jwtToken = tokenProvider.createToken(registeredUser);
 
         // 헤더와 바디에 JWT Token 넣어준 뒤 Return
