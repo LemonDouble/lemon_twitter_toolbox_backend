@@ -46,9 +46,6 @@ public class SqsMessageService {
     }
 
 
-
-
-
     // 문자 그대로 dto 를 message 로..
     private Message<String> dtoToMessage(Object object) throws JsonProcessingException {
         String payload = dtoToString(object);

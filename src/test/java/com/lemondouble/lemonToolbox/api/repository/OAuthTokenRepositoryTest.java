@@ -1,6 +1,7 @@
 package com.lemondouble.lemonToolbox.api.repository;
 
 import com.lemondouble.lemonToolbox.api.repository.entity.OAuthToken;
+import com.lemondouble.lemonToolbox.api.repository.entity.OAuthType;
 import com.lemondouble.lemonToolbox.api.repository.entity.ServiceUser;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,11 +29,17 @@ class OAuthTokenRepositoryTest {
         user1.setNickname("유저1");
         ServiceUser savedUser = serviceUserRepository.saveAndFlush(user1);
 
-        OAuthToken oAuthToken1 = new OAuthToken("TWITTER","abcabc", "abcabc", 123123L, savedUser);
+        OAuthToken oAuthToken1 = OAuthToken.builder()
+                .oauthType(OAuthType.Twitter)
+                .accessToken("abcabc")
+                .accessTokenSecret("cbacba")
+                .oauthUserId(123123L)
+                .serviceUser(savedUser)
+                .build();
 
         OAuthToken savedOAuthToken = oAuthTokenRepository.saveAndFlush(oAuthToken1);
         //when
-        List<OAuthToken> tokenList = oAuthTokenRepository.findByOauthTypeAndOauthUserId("TWITTER", 123123L);
+        List<OAuthToken> tokenList = oAuthTokenRepository.findByOauthTypeAndOauthUserId(OAuthType.Twitter, 123123L);
 
         //then
 
@@ -40,25 +47,36 @@ class OAuthTokenRepositoryTest {
         OAuthToken findToken = tokenList.get(0);
 
         assertEquals(savedOAuthToken, findToken);
-        assertEquals(savedUser, findToken.getUser());
+        assertEquals(savedUser, findToken.getServiceUser());
     }
 
     @Test
     public void findByOauthTypeAndOauthUserId_실패_신규가입시() throws Exception {
         //given
+
+        // 유저 회원가입
         ServiceUser user1 = new ServiceUser();
         user1.setNickname("유저1");
-        ServiceUser user2 = new ServiceUser();
-        user1.setNickname("유저2");
         ServiceUser savedUser1 = serviceUserRepository.saveAndFlush(user1);
-        ServiceUser savedUser2 = serviceUserRepository.saveAndFlush(user2);
 
-        OAuthToken oAuthToken1 = new OAuthToken("TWITTER","abcabc", "abcabc", 123123L, savedUser1);
+        // 위의 유저 바탕으로 Oauth Token 추가
+        OAuthToken oAuthToken1 = OAuthToken.builder()
+                .oauthType(OAuthType.Twitter)
+                .accessToken("abcabc")
+                .accessTokenSecret("cbacba")
+                .oauthUserId(123123L)
+                .serviceUser(savedUser1)
+                .build();
+
         OAuthToken savedOAuthToken = oAuthTokenRepository.saveAndFlush(oAuthToken1);
         //when
-        List<OAuthToken> findList = oAuthTokenRepository.findByOauthTypeAndOauthUserId("TWITTER", 111111L); // 신규 가입자의 경우 (DB에 없음)
+
+        // DB에 있는건 123123L, 111111L은 없어야 함!
+        List<OAuthToken> findList = oAuthTokenRepository.findByOauthTypeAndOauthUserId(OAuthType.Twitter, 111111L);
 
         //then
+
+        // 찾은 유저가 0명이어야 됨!
         assertEquals(0, findList.size());
     }
 }

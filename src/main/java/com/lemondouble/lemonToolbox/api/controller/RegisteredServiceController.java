@@ -26,7 +26,7 @@ public class RegisteredServiceController {
         this.sqsMessageService = sqsMessageService;
     }
 
-    // TODO : 서비스 가입 두번 됨 수정해야됨!
+
     @PostMapping("service/learn_me")
     public ResponseEntity<Void> registerLearnMe() throws JsonProcessingException {
         Long currentId = getUserId();
