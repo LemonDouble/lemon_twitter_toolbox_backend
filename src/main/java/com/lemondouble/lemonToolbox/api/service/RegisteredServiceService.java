@@ -27,8 +27,7 @@ public class RegisteredServiceService {
      */
     @Transactional
     public void joinLearnMe(Long userId){
-        ServiceUser serviceUser = serviceUserRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("찾는 유저가 없습니다!"));
+        ServiceUser serviceUser = getServiceUserByUserId(userId);
 
         List<RegisteredService> findRegisteredData =
                 registeredServiceRepository.findByServiceUserAndServiceType(serviceUser, ServiceType.LEARNME);
@@ -41,5 +40,55 @@ public class RegisteredServiceService {
 
             registeredServiceRepository.save(registeredService);
         }
+    }
+
+    /**
+     * 유저 Id와 Service Type (Learn Me.. 트윗청소기..) 받아 해당 서비스가 준비되어 있는지 리턴해 준다. <br>
+     * 주로 사전작업 필요한 Learn me 서비스 등에 쓰일 예정
+     */
+    @Transactional(readOnly = true)
+    public boolean checkServiceIsReady(Long userId, ServiceType serviceType){
+        ServiceUser serviceUser = getServiceUserByUserId(userId);
+
+        RegisteredService registeredService = getOneServiceUserAndServiceType(serviceUser, serviceType);
+
+        return registeredService.isReady();
+    }
+
+    @Transactional(readOnly = true)
+    public boolean checkServiceIsPublic(Long userId, ServiceType serviceType){
+        ServiceUser serviceUser = getServiceUserByUserId(userId);
+
+        RegisteredService registeredService = getOneServiceUserAndServiceType(serviceUser, serviceType);
+
+        return registeredService.isPublic();
+    }
+
+    /**
+     * 해당 유저와 Service Type 을 받아 해당 서비스 Entity 를 리턴해 준다. <br>
+     * 만약 찾는 서비스가 없거나, 결과값이 하나가 아니라면 Exception 발생시킨다.
+     */
+    private RegisteredService getOneServiceUserAndServiceType(ServiceUser serviceUser, ServiceType serviceType) {
+        List<RegisteredService> findServiceList =
+                registeredServiceRepository.findByServiceUserAndServiceType(serviceUser, serviceType);
+
+        if(findServiceList.isEmpty()){
+            throw new RuntimeException("찾는 서비스가 없습니다!");
+        }
+
+        if(findServiceList.size() != 1){
+            throw new RuntimeException("findByServiceUserAndServiceType 에러! 한 유저가 한 서비스에 중복 가입 되어 있습니다!");
+        }
+
+        return findServiceList.get(0);
+    }
+
+    /**
+     * User Id 받아 해당 User 객체 리턴해 준다.
+     */
+
+    private ServiceUser getServiceUserByUserId(Long userId) {
+        return serviceUserRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("찾는 유저가 없습니다!"));
     }
 }

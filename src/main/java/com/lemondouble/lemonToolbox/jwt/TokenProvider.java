@@ -61,6 +61,19 @@ public class TokenProvider implements InitializingBean {
                 .compact();
     }
 
+    public String createLearnMeAccessToken(Long accessUserId){
+
+        long now = (new Date()).getTime();
+        Date validity = new Date(now + (1800 * 1000));
+
+        return Jwts.builder()
+                .setSubject("user")
+                .claim("access_user", accessUserId)
+                .signWith(key, SignatureAlgorithm.HS512)
+                .setExpiration(validity)
+                .compact();
+    }
+
     // 인증 성공시 SecurityContextHolder에 저장할 Authentication 객체 생성
     public Authentication getAuthentication(String token){
         String user_id = Jwts

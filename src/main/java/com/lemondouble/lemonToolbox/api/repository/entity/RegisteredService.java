@@ -20,4 +20,10 @@ public class RegisteredService {
     // 어떤 서비스 사용중인지
     @Enumerated(EnumType.STRING)
     private ServiceType serviceType;
+
+    // 해당 서비스 준비되었는지?
+    private boolean isReady = false;
+
+    // 해당 서비스를 공개할 것인지? (True면 아무나 볼 수 있게)
+    private boolean isPublic = false;
 }
