@@ -9,6 +9,9 @@ import com.lemondouble.lemonToolbox.api.service.SqsMessageService;
 import com.lemondouble.lemonToolbox.api.service.TwitterUserService;
 import com.lemondouble.lemonToolbox.api.util.SecurityUtil;
 import com.lemondouble.lemonToolbox.jwt.TokenProvider;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -19,6 +22,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @RequestMapping("/api/service")
+@Tag(name = "registered-service-controller",description = "LearnMe, 트윗청소기 등 서비스 관련")
 public class RegisteredServiceController {
 
     private final RegisteredServiceService registeredServiceService;
@@ -45,6 +49,7 @@ public class RegisteredServiceController {
      * 4. Bert Model 을 통해 해당 트윗들을 Embedding 해 S3에 .pickle 로 저장한다. <br>
      * 5. TODO : 작업 완료 알람을 보내고 트위터에 알람을 보낸다. <br>
      */
+    @ApiOperation(value = "Learn Me 서비스 등록")
     @PostMapping("service/learn_me")
     public ResponseEntity<Void> registerLearnMe() throws JsonProcessingException {
         Long currentId = getUserId();
@@ -67,7 +72,6 @@ public class RegisteredServiceController {
      */
     @PostMapping("service/learn_me/token")
     public ResponseEntity<TokenDto> getLearnMeAccessToken(@RequestParam("access_id") Long accessId){
-
 
         // 서비스가 준비되었는지 확인
         boolean isReady = registeredServiceService.checkServiceIsReady(accessId, ServiceType.LEARNME);
