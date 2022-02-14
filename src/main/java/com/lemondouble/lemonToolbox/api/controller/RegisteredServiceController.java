@@ -2,7 +2,9 @@ package com.lemondouble.lemonToolbox.api.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.lemondouble.lemonToolbox.api.dto.OAuth.TokenDto;
+import com.lemondouble.lemonToolbox.api.dto.RegisteredService.RegisteredServiceDto;
 import com.lemondouble.lemonToolbox.api.repository.entity.OAuthToken;
+import com.lemondouble.lemonToolbox.api.repository.entity.RegisteredService;
 import com.lemondouble.lemonToolbox.api.repository.entity.ServiceType;
 import com.lemondouble.lemonToolbox.api.service.RegisteredServiceService;
 import com.lemondouble.lemonToolbox.api.service.SqsMessageService;
@@ -10,14 +12,15 @@ import com.lemondouble.lemonToolbox.api.service.TwitterUserService;
 import com.lemondouble.lemonToolbox.api.util.SecurityUtil;
 import com.lemondouble.lemonToolbox.jwt.TokenProvider;
 import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
-import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
+
+import javax.validation.Valid;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/service")
@@ -35,6 +38,39 @@ public class RegisteredServiceController {
         this.twitterUserService = twitterUserService;
         this.sqsMessageService = sqsMessageService;
         this.tokenProvider = tokenProvider;
+    }
+
+
+    /**
+     * 해당 유저가 가입하고 있는 서비스를 DB에서 조회하고 보여준다.
+     */
+
+    @ApiOperation(value = "현재 가입하고 있는 서비스 조회")
+    @GetMapping()
+    public ResponseEntity<List<RegisteredServiceDto>> getMyRegisteredService(){
+        Long currentId = getUserId();
+
+        List<RegisteredService> registeredServices =
+                registeredServiceService.getMyRegisteredServicesByUserId(currentId);
+
+        List<RegisteredServiceDto> responseDto = registeredServices.stream().map(
+                RegisteredServiceDto::new
+        ).collect(Collectors.toList());
+
+        return new ResponseEntity<>(responseDto, HttpStatus.OK);
+    }
+
+    @ApiOperation(value = "현재 가입하고 있는 서비스 상태 수정")
+    @PutMapping()
+    public ResponseEntity<RegisteredServiceDto> setMyRegisteredService(@RequestBody @Valid RegisteredServiceDto registeredServiceDto){
+        Long currentId = getUserId();
+
+        RegisteredService modifiedRegisteredService =
+                registeredServiceService.modifyServiceInfoByUserIdAndServiceDto(currentId, registeredServiceDto);
+
+        RegisteredServiceDto responseDto = new RegisteredServiceDto(modifiedRegisteredService);
+
+        return new ResponseEntity<>(responseDto, HttpStatus.OK);
     }
 
     /**
@@ -64,7 +100,6 @@ public class RegisteredServiceController {
         return new ResponseEntity<>(null, HttpStatus.CREATED);
     }
 
-
     /**
      * TODO
      * 이후 AWS Lambda 에 챗봇 요청 보낼때, 권한 요청을 위해 이 서버에서 JWT 발급 후, Lambda에서 JWT 인증을 할 예정. <br>
@@ -81,7 +116,8 @@ public class RegisteredServiceController {
         boolean isReady = registeredServiceService.checkServiceIsReady(accessId, ServiceType.LEARNME);
         if(!isReady){
             throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST, "Service is not ready! please try later");
+                    HttpStatus.BAD_REQUEST,
+                    "Service is not ready! please try later");
         }
 
         //만약 자신의 Token 요청한다면, public 확인 없이 바로 Token 발급해줌

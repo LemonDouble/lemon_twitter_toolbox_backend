@@ -6,7 +6,7 @@ import javax.persistence.*;
 
 // 이 서비스에서 가입하고 있는 서비스 Entity
 @Entity
-@Getter @Setter @AllArgsConstructor @NoArgsConstructor @Builder
+@Getter @AllArgsConstructor @NoArgsConstructor @Builder
 public class RegisteredService {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -22,8 +22,10 @@ public class RegisteredService {
     private ServiceType serviceType;
 
     // 해당 서비스 준비되었는지?
+    @Setter
     private boolean isReady = false;
 
     // 해당 서비스를 공개할 것인지? (True면 아무나 볼 수 있게)
+    @Setter
     private boolean isPublic = false;
 }

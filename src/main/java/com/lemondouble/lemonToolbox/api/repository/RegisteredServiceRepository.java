@@ -9,4 +9,5 @@ import java.util.List;
 
 public interface RegisteredServiceRepository extends JpaRepository<RegisteredService, Long> {
     List<RegisteredService> findByServiceUserAndServiceType(ServiceUser serviceUser, ServiceType serviceType);
+    List<RegisteredService> findByServiceUser(ServiceUser serviceUser);
 }

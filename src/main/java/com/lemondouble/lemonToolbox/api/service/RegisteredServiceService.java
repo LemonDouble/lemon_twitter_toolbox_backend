@@ -1,5 +1,6 @@
 package com.lemondouble.lemonToolbox.api.service;
 
+import com.lemondouble.lemonToolbox.api.dto.RegisteredService.RegisteredServiceDto;
 import com.lemondouble.lemonToolbox.api.repository.RegisteredServiceRepository;
 import com.lemondouble.lemonToolbox.api.repository.ServiceUserRepository;
 import com.lemondouble.lemonToolbox.api.repository.entity.RegisteredService;
@@ -55,6 +56,9 @@ public class RegisteredServiceService {
         return registeredService.isReady();
     }
 
+    /**
+     * 유저 Id와 서비스 타입(Learnme..) 등 받아 해당 서비스가 public인지 확인한다.
+     */
     @Transactional(readOnly = true)
     public boolean checkServiceIsPublic(Long userId, ServiceType serviceType){
         ServiceUser serviceUser = getServiceUserByUserId(userId);
@@ -62,6 +66,29 @@ public class RegisteredServiceService {
         RegisteredService registeredService = getOneServiceUserAndServiceType(serviceUser, serviceType);
 
         return registeredService.isPublic();
+    }
+
+    /**
+     * 유저 Id 받아 해당 유저가 가입중인 서비스를 리턴한다.
+     */
+    @Transactional(readOnly = true)
+    public List<RegisteredService> getMyRegisteredServicesByUserId(Long userId){
+        ServiceUser serviceUser = getServiceUserByUserId(userId);
+
+        return registeredServiceRepository.findByServiceUser(serviceUser);
+    }
+
+
+    @Transactional
+    public RegisteredService modifyServiceInfoByUserIdAndServiceDto(Long userId, RegisteredServiceDto registeredServiceDto){
+        ServiceUser serviceUser = getServiceUserByUserId(userId);
+
+        RegisteredService findService =
+                getOneServiceUserAndServiceType(serviceUser, registeredServiceDto.getServiceType());
+
+        findService.setPublic(registeredServiceDto.isPublic());
+
+        return findService;
     }
 
     /**

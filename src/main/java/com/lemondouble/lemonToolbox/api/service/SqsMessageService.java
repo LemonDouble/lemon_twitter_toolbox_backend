@@ -7,12 +7,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.lemondouble.lemonToolbox.api.dto.sqs.queueUserRequestDto;
 import com.lemondouble.lemonToolbox.api.repository.entity.OAuthToken;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.aws.messaging.core.QueueMessagingTemplate;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Service;
 
 @Service
+@Slf4j
 public class SqsMessageService {
 
     private final QueueMessagingTemplate queueMessagingTemplate;
@@ -42,7 +44,8 @@ public class SqsMessageService {
                 .build();
 
         Message<String> message = dtoToMessage(requestDto);
-        queueMessagingTemplate.send("TweetGetRequestQueue", message);
+        queueMessagingTemplate.send("dummy", message);
+        //queueMessagingTemplate.send("TweetGetRequestQueue", message);
     }
 
 
