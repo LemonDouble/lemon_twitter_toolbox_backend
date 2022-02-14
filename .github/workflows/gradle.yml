@@ -9,9 +9,9 @@ name: Java CI with Gradle
 
 on:
   push:
-    branches: [ master ]
+    branches: [ master, hotfix ]
   pull_request:
-    branches: [ master ]
+    branches: [ master, hotfix ]
 
 jobs:
   build:
@@ -27,7 +27,7 @@ jobs:
         java-version: '11'
         distribution: 'temurin'
 
-    - name: set poperties
+    - name: set properties
       run : mkdir -p ./src/main/resources/ && cp ./.github/settings/application.yml ./src/main/resources/application.yml
 
     - name: Grant execute permission for gradlew
