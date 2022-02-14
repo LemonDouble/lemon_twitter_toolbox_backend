@@ -102,7 +102,7 @@ public class TwitterOauthService {
 
         // Twitter OAuth Token 중에서, 고유 ID가 받은 Token과 같은 유저를 찾는다.
         // Twitter 내에서 유저의 고유 ID는 고정되어 있기 때문에, 이와 같이 하면 항상 같은 유저가 찾아짐이 보장된다.
-        List<OAuthToken> OAuthList = oAuthTokenRepository.findByOauthTypeAndOauthUserId(OAuthType.Twitter, accessToken.getUserId());
+        List<OAuthToken> OAuthList = oAuthTokenRepository.findByOauthTypeAndOauthUserId(OAuthType.TWITTER, accessToken.getUserId());
 
         // 만약 가입한 적 없다면, empty 리턴한다.
         if(OAuthList.isEmpty()){
@@ -114,7 +114,7 @@ public class TwitterOauthService {
             log.error("TwitterOauthService.findUserByAccessToken 무결성 Error, 한 고유 ID에 유저가 두명 이상! userId = {}",
                     accessToken.getUserId());
 
-            throw new RuntimeException("findByOauthTypeAndOAuthUserId Error! OAUTH_TYPE = " + OAuthType.Twitter + " , "
+            throw new RuntimeException("findByOauthTypeAndOAuthUserId Error! OAUTH_TYPE = " + OAuthType.TWITTER + " , "
                     + "userId = " + accessToken.getUserId());
         }
 
@@ -145,7 +145,7 @@ public class TwitterOauthService {
         ServiceUser savedUser = serviceUserRepository.save(user);
 
         OAuthToken oAuthToken = OAuthToken.builder()
-                .oauthType(OAuthType.Twitter)
+                .oauthType(OAuthType.TWITTER)
                 .accessToken(accessToken.getToken())
                 .accessTokenSecret(accessToken.getTokenSecret())
                 .oauthUserId(accessToken.getUserId())

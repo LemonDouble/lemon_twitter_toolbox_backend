@@ -10,5 +10,5 @@ import lombok.Data;
 public class queueUserRequestDto {
     private String AccessToken;
     private String AccessSecret;
-    private Long userId;
+    private String userId;
 }

@@ -34,18 +34,18 @@ public class SqsMessageService {
      * 2. 나한테 온 멘션을 Question, 내가 보낸 답멘을 Answer 로 정리한다. <br>
      * 3. 다음 Pipeline 에 의해 중복 Tweet 은 제거된다. <br>
      * 4. Bert Model 을 통해 해당 트윗들을 Embedding 해 S3에 .pickle 로 저장한다. <br>
-     * 5. TODO : 작업 완료 알람을 보내고 트위터에 알람을 보낸다. <br>
+     * 5. 작업 완료 알람을 보내고 트위터에 알람을 보낸다., 완료되었음을 Spring Server에 알리고 isReady를 True로 바꾼다. <br>
      */
     public void sendToRequestTweetQueue(OAuthToken RequestUserOAuthToken) throws JsonProcessingException {
         queueUserRequestDto requestDto = queueUserRequestDto.builder()
-                .userId(RequestUserOAuthToken.getOauthUserId())
+                .userId(RequestUserOAuthToken.getOauthUserId().toString())
                 .AccessToken(RequestUserOAuthToken.getAccessToken())
                 .AccessSecret(RequestUserOAuthToken.getAccessTokenSecret())
                 .build();
 
         Message<String> message = dtoToMessage(requestDto);
-        queueMessagingTemplate.send("dummy", message);
-        //queueMessagingTemplate.send("TweetGetRequestQueue", message);
+        //queueMessagingTemplate.send("dummy", message);
+        queueMessagingTemplate.send("TweetGetRequestQueue", message);
     }
 
 

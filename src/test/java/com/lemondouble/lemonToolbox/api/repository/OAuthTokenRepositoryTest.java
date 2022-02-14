@@ -30,7 +30,7 @@ class OAuthTokenRepositoryTest {
         ServiceUser savedUser = serviceUserRepository.saveAndFlush(user1);
 
         OAuthToken oAuthToken1 = OAuthToken.builder()
-                .oauthType(OAuthType.Twitter)
+                .oauthType(OAuthType.TWITTER)
                 .accessToken("abcabc")
                 .accessTokenSecret("cbacba")
                 .oauthUserId(123123L)
@@ -39,7 +39,7 @@ class OAuthTokenRepositoryTest {
 
         OAuthToken savedOAuthToken = oAuthTokenRepository.saveAndFlush(oAuthToken1);
         //when
-        List<OAuthToken> tokenList = oAuthTokenRepository.findByOauthTypeAndOauthUserId(OAuthType.Twitter, 123123L);
+        List<OAuthToken> tokenList = oAuthTokenRepository.findByOauthTypeAndOauthUserId(OAuthType.TWITTER, 123123L);
 
         //then
 
@@ -61,7 +61,7 @@ class OAuthTokenRepositoryTest {
 
         // 위의 유저 바탕으로 Oauth Token 추가
         OAuthToken oAuthToken1 = OAuthToken.builder()
-                .oauthType(OAuthType.Twitter)
+                .oauthType(OAuthType.TWITTER)
                 .accessToken("abcabc")
                 .accessTokenSecret("cbacba")
                 .oauthUserId(123123L)
@@ -72,7 +72,7 @@ class OAuthTokenRepositoryTest {
         //when
 
         // DB에 있는건 123123L, 111111L은 없어야 함!
-        List<OAuthToken> findList = oAuthTokenRepository.findByOauthTypeAndOauthUserId(OAuthType.Twitter, 111111L);
+        List<OAuthToken> findList = oAuthTokenRepository.findByOauthTypeAndOauthUserId(OAuthType.TWITTER, 111111L);
 
         //then
 
