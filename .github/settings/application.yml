@@ -53,8 +53,14 @@ twitter:
 cloud:
   aws:
     region:
-      auto: false
       static: ap-northeast-2
-      use-default-aws-region-chain: true
-    stack: false
-    stack.auto: false
+    stack:
+      auto: false
+
+sqs:
+  mock:
+    enabled: true
+    randomPortEnabled: true
+  queues:
+    -
+      name: 'ServiceReadyQueue'
