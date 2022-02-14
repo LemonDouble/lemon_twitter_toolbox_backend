@@ -24,17 +24,4 @@ class TokenProviderTest {
         //then
         System.out.println("token = " + token);
     }
-
-    @Test
-    public void getAuthentication() throws Exception {
-        //given
-        String token = "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ1c2VyIiwidXNlcl9pZCI6MSwiZXhwIjoxNjQ1NDg3MjIwfQ.nr6xjPUjBeSly7CyZXDYYJ6RJ5llK8c8dmmrRKBy8uruvj-irI6baojAuM_LaNPnmcWb3A0jSFcexE7wmQJdqA";
-
-        //when
-        Authentication authentication = tokenProvider.getAuthentication(token);
-
-        //then
-
-        System.out.println("authentication = " + authentication);
-    }
 }
