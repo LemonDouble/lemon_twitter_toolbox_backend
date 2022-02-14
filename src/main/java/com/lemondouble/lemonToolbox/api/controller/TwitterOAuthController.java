@@ -6,6 +6,8 @@ import com.lemondouble.lemonToolbox.api.repository.entity.ServiceUser;
 import com.lemondouble.lemonToolbox.api.service.TwitterOauthService;
 import com.lemondouble.lemonToolbox.jwt.JwtFilter;
 import com.lemondouble.lemonToolbox.jwt.TokenProvider;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +21,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/oauth/twitter")
+@Tag(name = "twitter-o-auth-controller",description = "트위터 OAuth 인증 관련")
 public class TwitterOAuthController {
 
     private final TwitterOauthService twitterOauthService;
@@ -34,6 +37,7 @@ public class TwitterOAuthController {
      * 유저가 해당 Request Token 들고 로그인 해야 한다. <br>
      * 해당 Request Token을 발급해 준다. Front 기준으로는, SNS Login URL을 얻을 수 있다.
      */
+    @ApiOperation(value = "Request Token 요청")
     @GetMapping("/request-token")
     public RequestToken getRequestToken() throws TwitterException {
         return twitterOauthService.getRequestToken();
@@ -48,7 +52,10 @@ public class TwitterOAuthController {
      * (이후 여러 SNS 지원하게 되면, 한 유저에 여러 SNS 연동할 수도 있으므로) <br>
      * 마지막으로, 로그인 시 필요한 JWT TOKEN을 발급해 준다.
      */
+    @ApiOperation(value = "Oauth Token 으로 Access Token 서버에 등록 및 로그인",
+    notes = "만약 회원가입 되어 있지 않다면, 자동으로 우리 서비스 회원가입도 시킨다.")
     @PostMapping("/twitter-login")
+    @ResponseStatus(value = HttpStatus.CREATED)
     public ResponseEntity<TokenDto> authorize(
             @RequestBody TwitterRequestOauthTokenDto twitterRequestOauthTokenDto,
             HttpServletResponse response) throws TwitterException {
@@ -76,6 +83,6 @@ public class TwitterOAuthController {
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.add(JwtFilter.AUTHORIZATION_HEADER, "Bearer " + jwtToken);
 
-        return new ResponseEntity<>(new TokenDto(jwtToken), httpHeaders, HttpStatus.OK);
+        return new ResponseEntity<>(new TokenDto(jwtToken), httpHeaders, HttpStatus.CREATED);
     }
 }

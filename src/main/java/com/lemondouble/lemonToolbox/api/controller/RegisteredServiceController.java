@@ -10,14 +10,13 @@ import com.lemondouble.lemonToolbox.api.service.TwitterUserService;
 import com.lemondouble.lemonToolbox.api.util.SecurityUtil;
 import com.lemondouble.lemonToolbox.jwt.TokenProvider;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 @RestController
@@ -50,6 +49,7 @@ public class RegisteredServiceController {
      * 5. TODO : 작업 완료 알람을 보내고 트위터에 알람을 보낸다. <br>
      */
     @ApiOperation(value = "Learn Me 서비스 등록")
+    @ResponseStatus(value = HttpStatus.CREATED)
     @PostMapping("service/learn_me")
     public ResponseEntity<Void> registerLearnMe() throws JsonProcessingException {
         Long currentId = getUserId();
@@ -70,7 +70,11 @@ public class RegisteredServiceController {
      * 이후 AWS Lambda 에 챗봇 요청 보낼때, 권한 요청을 위해 이 서버에서 JWT 발급 후, Lambda에서 JWT 인증을 할 예정. <br>
      * 따라서 현재 유저 ID 기반으로 해당 유저의 Learn Me 서비스에 접근하는 것이 허용되는지 확인 후, 해당 USER ID의 TOKEN 발급 <br>
      */
+    @ApiOperation(value = "Learn me AWS Lambda 접근 위한 JWT 토큰 발급",
+            notes = "각 유저의 public 설정 여부 등을 고려하여 30분짜리 인증 Token을 발급해 줌. " +
+                    "이후 이 JWT Token을 Lambda에 제출하면 챗봇 사용 가능")
     @PostMapping("service/learn_me/token")
+    @ResponseStatus(value = HttpStatus.CREATED)
     public ResponseEntity<TokenDto> getLearnMeAccessToken(@RequestParam("access_id") Long accessId){
 
         // 서비스가 준비되었는지 확인
@@ -96,7 +100,7 @@ public class RegisteredServiceController {
         }
 
         String jwt = tokenProvider.createLearnMeAccessToken(accessId);
-        return new ResponseEntity<>(new TokenDto(jwt), HttpStatus.OK);
+        return new ResponseEntity<>(new TokenDto(jwt), HttpStatus.CREATED);
     }
 
     private Long getUserId() {

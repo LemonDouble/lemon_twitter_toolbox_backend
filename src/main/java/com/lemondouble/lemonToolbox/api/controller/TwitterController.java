@@ -4,6 +4,8 @@ package com.lemondouble.lemonToolbox.api.controller;
 import com.lemondouble.lemonToolbox.api.dto.Twitter.TwitterProfileDto;
 import com.lemondouble.lemonToolbox.api.service.TwitterUserService;
 import com.lemondouble.lemonToolbox.api.util.SecurityUtil;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -12,6 +14,7 @@ import twitter4j.User;
 
 @RestController
 @RequestMapping("/api/twitter")
+@Tag(name = "twitter-controller",description = "트위터 API 사용해야 하는 기능들")
 public class TwitterController {
     private final TwitterUserService twitterUserService;
 
@@ -25,6 +28,7 @@ public class TwitterController {
      * screenNickname -> 레몬둘 <br>
      * userBio -> 이런저런 것들을 합니다. <br>
      */
+    @ApiOperation(value = "트위터 프로필 가져오기 (id, 닉네임, 프사,배너 등..)")
     @GetMapping("/user-profile")
     public TwitterProfileDto getProfileURL() throws TwitterException {
 
