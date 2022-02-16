@@ -2,7 +2,8 @@ package com.lemondouble.lemonToolbox.api.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.lemondouble.lemonToolbox.api.dto.OAuth.TokenDto;
-import com.lemondouble.lemonToolbox.api.dto.RegisteredService.RegisteredServiceDto;
+import com.lemondouble.lemonToolbox.api.dto.RegisteredService.RegisteredServiceModifyDto;
+import com.lemondouble.lemonToolbox.api.dto.RegisteredService.RegisteredServiceResponseDto;
 import com.lemondouble.lemonToolbox.api.repository.entity.OAuthToken;
 import com.lemondouble.lemonToolbox.api.repository.entity.RegisteredService;
 import com.lemondouble.lemonToolbox.api.repository.entity.ServiceType;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.validation.Valid;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -47,14 +49,14 @@ public class RegisteredServiceController {
 
     @ApiOperation(value = "현재 가입하고 있는 서비스 조회")
     @GetMapping()
-    public ResponseEntity<List<RegisteredServiceDto>> getMyRegisteredService(){
+    public ResponseEntity<List<RegisteredServiceResponseDto>> getMyRegisteredService(){
         Long currentId = getUserId();
 
         List<RegisteredService> registeredServices =
                 registeredServiceService.getMyRegisteredServicesByUserId(currentId);
 
-        List<RegisteredServiceDto> responseDto = registeredServices.stream().map(
-                RegisteredServiceDto::new
+        List<RegisteredServiceResponseDto> responseDto = registeredServices.stream().map(
+                RegisteredServiceResponseDto::new
         ).collect(Collectors.toList());
 
         return new ResponseEntity<>(responseDto, HttpStatus.OK);
@@ -62,15 +64,26 @@ public class RegisteredServiceController {
 
     @ApiOperation(value = "현재 가입하고 있는 서비스 상태 수정")
     @PutMapping()
-    public ResponseEntity<RegisteredServiceDto> setMyRegisteredService(@RequestBody @Valid RegisteredServiceDto registeredServiceDto){
+    public ResponseEntity<RegisteredServiceModifyDto> setMyRegisteredService(@RequestBody @Valid RegisteredServiceModifyDto registeredServiceModifyDto){
         Long currentId = getUserId();
 
         RegisteredService modifiedRegisteredService =
-                registeredServiceService.modifyServiceInfoByUserIdAndServiceDto(currentId, registeredServiceDto);
+                registeredServiceService.modifyServiceInfoByUserIdAndServiceDto(currentId, registeredServiceModifyDto);
 
-        RegisteredServiceDto responseDto = new RegisteredServiceDto(modifiedRegisteredService);
+        RegisteredServiceModifyDto responseDto = new RegisteredServiceModifyDto(modifiedRegisteredService);
 
         return new ResponseEntity<>(responseDto, HttpStatus.OK);
+    }
+
+    @ApiOperation(value = "내 Learn Me 서비스 상태 조회")
+    @GetMapping("/learn_me")
+    public ResponseEntity<RegisteredServiceResponseDto> getLearnMeStatus() throws JsonProcessingException {
+        Long currentId = getUserId();
+
+        RegisteredServiceResponseDto learnMeServiceStatus =
+               new RegisteredServiceResponseDto(registeredServiceService.getOneRegisteredServicesByUserIdAndType(currentId, ServiceType.LEARNME));
+
+        return new ResponseEntity<>(learnMeServiceStatus, HttpStatus.OK);
     }
 
     /**
@@ -82,20 +95,24 @@ public class RegisteredServiceController {
      * 2. 나한테 온 멘션을 Question, 내가 보낸 답멘을 Answer 로 정리한다. <br>
      * 3. 다음 Pipeline 에 의해 중복 Tweet 은 제거된다. <br>
      * 4. Bert Model 을 통해 해당 트윗들을 Embedding 해 S3에 .pickle 로 저장한다. <br>
-     * 5. TODO : 작업 완료 알람을 보내고 트위터에 알람을 보낸다. <br>
+     * 5. 작업 완료 알람을 보내고 트위터에 알람을 보낸다. <br>
      */
-    @ApiOperation(value = "Learn Me 서비스 등록")
+    @ApiOperation(value = "Learn Me 서비스 등록 및 사용")
     @ResponseStatus(value = HttpStatus.CREATED)
-    @PostMapping("service/learn_me")
-    public ResponseEntity<Void> registerLearnMe() throws JsonProcessingException {
+    @PostMapping("/learn_me")
+    public ResponseEntity<Void> usingLearnMe() throws JsonProcessingException {
         Long currentId = getUserId();
 
         // 현재 유저를 learn Me 서비스에 가입시킨다
+        // 단, 중복 가입은 안 되므로, 이미 가입되어 있다면 무시된다.
         registeredServiceService.joinLearnMe(currentId);
 
         // 현재 유저의 oAuthToken 으로 SQS Queue 에 서비스 요청 날린다.
         OAuthToken oAuthToken = twitterUserService.getOAuthTokenByUserId(currentId);
-        sqsMessageService.sendToRequestTweetQueue(oAuthToken);
+        //sqsMessageService.sendToRequestTweetQueue(oAuthToken);
+
+        // 다음 사용 가능 시간을 내일 이 시간으로 변경
+        registeredServiceService.setNextUseTime(currentId, ServiceType.LEARNME, LocalDateTime.now().plusDays(1));
 
         return new ResponseEntity<>(null, HttpStatus.CREATED);
     }
@@ -108,7 +125,7 @@ public class RegisteredServiceController {
     @ApiOperation(value = "Learn me AWS Lambda 접근 위한 JWT 토큰 발급",
             notes = "각 유저의 public 설정 여부 등을 고려하여 30분짜리 인증 Token을 발급해 줌. " +
                     "이후 이 JWT Token을 Lambda에 제출하면 챗봇 사용 가능")
-    @PostMapping("service/learn_me/token")
+    @PostMapping("/learn_me/token")
     @ResponseStatus(value = HttpStatus.CREATED)
     public ResponseEntity<TokenDto> getLearnMeAccessToken(@RequestParam("access_id") Long accessId){
 

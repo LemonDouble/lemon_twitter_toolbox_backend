@@ -46,6 +46,8 @@ public class SqsMessageService {
         Message<String> message = dtoToMessage(requestDto);
         //queueMessagingTemplate.send("dummy", message);
         queueMessagingTemplate.send("TweetGetRequestQueue", message);
+
+
     }
 
 

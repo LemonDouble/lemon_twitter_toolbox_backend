@@ -2,19 +2,17 @@ package com.lemondouble.lemonToolbox.api.dto.RegisteredService;
 
 import com.lemondouble.lemonToolbox.api.repository.entity.RegisteredService;
 import com.lemondouble.lemonToolbox.api.repository.entity.ServiceType;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 
 import javax.validation.constraints.NotNull;
 
 @Data
-public class RegisteredServiceDto {
+public class RegisteredServiceModifyDto {
 
-    public RegisteredServiceDto() {
+    public RegisteredServiceModifyDto() {
     }
 
-    public RegisteredServiceDto(RegisteredService registeredService) {
+    public RegisteredServiceModifyDto(RegisteredService registeredService) {
         this.serviceType = registeredService.getServiceType();
         this.isPublic = registeredService.isPublic();
     }

@@ -3,6 +3,7 @@ package com.lemondouble.lemonToolbox.api.repository.entity;
 import lombok.*;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 
 // 이 서비스에서 가입하고 있는 서비스 Entity
 @Entity
@@ -28,4 +29,8 @@ public class RegisteredService {
     // 해당 서비스를 공개할 것인지? (True면 아무나 볼 수 있게)
     @Setter
     private boolean isPublic = false;
+
+    // 해당 서비스 다음 사용가능 시간이 언제인지?
+    @Setter
+    private LocalDateTime canUseTime = LocalDateTime.now();
 }

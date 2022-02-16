@@ -1,6 +1,6 @@
 package com.lemondouble.lemonToolbox.api.service;
 
-import com.lemondouble.lemonToolbox.api.dto.RegisteredService.RegisteredServiceDto;
+import com.lemondouble.lemonToolbox.api.dto.RegisteredService.RegisteredServiceModifyDto;
 import com.lemondouble.lemonToolbox.api.repository.RegisteredServiceRepository;
 import com.lemondouble.lemonToolbox.api.repository.ServiceUserRepository;
 import com.lemondouble.lemonToolbox.api.repository.entity.RegisteredService;
@@ -9,6 +9,7 @@ import com.lemondouble.lemonToolbox.api.repository.entity.ServiceUser;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -37,10 +38,19 @@ public class RegisteredServiceService {
         if(findRegisteredData.isEmpty()){
             RegisteredService registeredService = RegisteredService.builder()
                     .serviceType(ServiceType.LEARNME)
-                    .serviceUser(serviceUser).build();
+                    .serviceUser(serviceUser)
+                    .build();
 
             registeredServiceRepository.save(registeredService);
         }
+    }
+
+    @Transactional
+    public void setNextUseTime(Long userId, ServiceType serviceType, LocalDateTime nextUseTime){
+        ServiceUser serviceUser = getServiceUserByUserId(userId);
+
+        RegisteredService registeredService = getOneServiceUserAndServiceType(serviceUser, serviceType);
+        registeredService.setCanUseTime(nextUseTime);
     }
 
     /**
@@ -78,15 +88,23 @@ public class RegisteredServiceService {
         return registeredServiceRepository.findByServiceUser(serviceUser);
     }
 
+    @Transactional(readOnly = true)
+    public RegisteredService getOneRegisteredServicesByUserIdAndType(Long userId, ServiceType serviceType){
+        ServiceUser serviceUser = getServiceUserByUserId(userId);
+
+        return getOneServiceUserAndServiceType(serviceUser, serviceType);
+    }
+
+
 
     @Transactional
-    public RegisteredService modifyServiceInfoByUserIdAndServiceDto(Long userId, RegisteredServiceDto registeredServiceDto){
+    public RegisteredService modifyServiceInfoByUserIdAndServiceDto(Long userId, RegisteredServiceModifyDto registeredServiceModifyDto){
         ServiceUser serviceUser = getServiceUserByUserId(userId);
 
         RegisteredService findService =
-                getOneServiceUserAndServiceType(serviceUser, registeredServiceDto.getServiceType());
+                getOneServiceUserAndServiceType(serviceUser, registeredServiceModifyDto.getServiceType());
 
-        findService.setPublic(registeredServiceDto.isPublic());
+        findService.setPublic(registeredServiceModifyDto.isPublic());
 
         return findService;
     }
