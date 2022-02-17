@@ -41,6 +41,8 @@ public class TwitterController {
                 .userBio(currentUser.getDescription())
                 .profileImageURL(currentUser.get400x400ProfileImageURLHttps())
                 .bannerImageURL(currentUser.getProfileBanner1500x500URL())
+                .followingCount(currentUser.getFriendsCount())
+                .followerCount(currentUser.getFollowersCount())
                 .build();
     }
 

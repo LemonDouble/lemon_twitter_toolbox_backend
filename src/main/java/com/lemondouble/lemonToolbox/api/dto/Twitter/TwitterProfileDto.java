@@ -11,4 +11,6 @@ public class TwitterProfileDto {
     private String userBio;
     private String profileImageURL;
     private String bannerImageURL;
+    private int followingCount;
+    private int followerCount;
 }

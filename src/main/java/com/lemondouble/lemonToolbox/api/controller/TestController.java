@@ -23,7 +23,8 @@ public class TestController {
 
     @ApiOperation(value = "테스트용")
     @GetMapping("/test")
-    public void hello() throws TwitterException, JsonProcessingException {
+    public String hello() throws TwitterException, JsonProcessingException {
+        return "안뇽안뇽";
     }
 
 }

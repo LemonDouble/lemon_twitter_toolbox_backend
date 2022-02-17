@@ -109,7 +109,7 @@ public class RegisteredServiceController {
 
         // 현재 유저의 oAuthToken 으로 SQS Queue 에 서비스 요청 날린다.
         OAuthToken oAuthToken = twitterUserService.getOAuthTokenByUserId(currentId);
-        //sqsMessageService.sendToRequestTweetQueue(oAuthToken);
+        sqsMessageService.sendToRequestTweetQueue(oAuthToken);
 
         // 다음 사용 가능 시간을 내일 이 시간으로 변경
         registeredServiceService.setNextUseTime(currentId, ServiceType.LEARNME, LocalDateTime.now().plusDays(1));
