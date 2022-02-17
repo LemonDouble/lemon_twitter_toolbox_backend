@@ -47,15 +47,17 @@ public class TokenProvider implements InitializingBean {
         this.key = Keys.hmacShaKeyFor(keyBytes);
     }
 
-    // User 객체를 받아 JWT Token 생성
-    public String createToken(ServiceUser user){
+    // User, twitter_oauth_id 객체를 받아 JWT Token 생성
+    public String createToken(ServiceUser user, String twitter_oauth_id){
 
         long now = (new Date()).getTime();
         Date validity = new Date(now + this.tokenValidityInMilliseconds);
 
+
         return Jwts.builder()
                 .setSubject("user")
                 .claim("user_id", user.getId())
+                .claim("oauth_token",twitter_oauth_id)
                 .signWith(key, SignatureAlgorithm.HS512)
                 .setExpiration(validity)
                 .compact();

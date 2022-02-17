@@ -77,7 +77,7 @@ public class TwitterOAuthController {
         }
 
         // 로그인용 JWT TOKEN 생성
-        String jwtToken = tokenProvider.createToken(registeredUser);
+        String jwtToken = tokenProvider.createToken(registeredUser, Long.toString(accessToken.getUserId()));
 
         // 헤더와 바디에 JWT Token 넣어준 뒤 Return
         HttpHeaders httpHeaders = new HttpHeaders();
