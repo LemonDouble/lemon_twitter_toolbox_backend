@@ -11,5 +11,4 @@ public class LemonToolboxApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(LemonToolboxApplication.class, args);
 	}
-
 }
