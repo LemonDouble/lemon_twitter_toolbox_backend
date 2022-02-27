@@ -36,8 +36,12 @@ dependencies {
 	implementation 'org.springframework.cloud:spring-cloud-starter-aws-messaging:2.2.6.RELEASE'
 	implementation 'org.springframework.cloud:spring-cloud-aws-autoconfigure:2.2.6.RELEASE'
 
-	// SQS Mock Lib (https://github.com/jojoldu/spring-boot-aws-mock)
-	implementation 'com.github.jojoldu.spring-boot-aws-mock:mock-sqs-spring-boot-starter:0.4.1'
+	// https://mvnrepository.com/artifact/com.amazonaws/aws-java-sdk-sqs
+	implementation 'com.amazonaws:aws-java-sdk-sqs:1.12.167'
+	// https://mvnrepository.com/artifact/org.testcontainers/localstack
+	testImplementation 'org.testcontainers:localstack:1.16.3'
+	// https://mvnrepository.com/artifact/org.testcontainers/junit-jupiter
+	testImplementation 'org.testcontainers:junit-jupiter:1.16.3'
 
 	// https://mvnrepository.com/artifact/io.springfox/springfox-boot-starter
 	// Swagger API

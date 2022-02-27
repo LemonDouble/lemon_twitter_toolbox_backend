@@ -59,17 +59,20 @@ public class SqsMessageService {
         Message<String> message = dtoToMessage(requestDto);
 
         // serviceCountRepository 의 1번 entity : Learn-Me count
-        ServiceCount LearnMeCount = serviceCountRepository.getById(1L);
+        ServiceCount learnmeCount = serviceCountRepository.findById("LEARNME")
+                .orElseThrow(() -> {
+                    throw new RuntimeException("LEARNME Count가 없습니다!");
+                });
 
-        if(LearnMeCount.getCount() > LEARNME_LIMIT){
+        if(learnmeCount.getCount() > LEARNME_LIMIT){
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "오늘 사용가능한 사람 수를 넘었습니다!");
         }
-        LearnMeCount.setCount(LearnMeCount.getCount()+1);
+        learnmeCount.setCount(learnmeCount.getCount()+1);
         queueMessagingTemplate.send("TweetGetRequestQueue", message);
 
 
         return LearnMeRegisterResponseDto.builder()
-                .registerCount(LearnMeCount.getCount()).registerLimit(LEARNME_LIMIT).build();
+                .registerCount(learnmeCount.getCount()).registerLimit(LEARNME_LIMIT).build();
     }
 
     public void sendToTweetNotificationQueue(OAuthToken RequestUserOAuthToken) throws JsonProcessingException {
@@ -81,7 +84,6 @@ public class SqsMessageService {
                 .build();
 
         Message<String> message = dtoToMessage(requestDto);
-        //queueMessagingTemplate.send("dummy", message);
         queueMessagingTemplate.send("TweetNotificationQueue", message);
     }
 
