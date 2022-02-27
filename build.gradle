@@ -36,8 +36,9 @@ dependencies {
 	implementation 'org.springframework.cloud:spring-cloud-starter-aws-messaging:2.2.6.RELEASE'
 	implementation 'org.springframework.cloud:spring-cloud-aws-autoconfigure:2.2.6.RELEASE'
 
-	// SQS Mock Lib (https://github.com/jojoldu/spring-boot-aws-mock)
-	implementation 'com.github.jojoldu.spring-boot-aws-mock:mock-sqs-spring-boot-starter:0.4.1'
+	// AWS Service Mocking Lib
+	// https://mvnrepository.com/artifact/cloud.localstack/localstack-utils
+	testImplementation 'cloud.localstack:localstack-utils:0.2.20'
 
 	// https://mvnrepository.com/artifact/io.springfox/springfox-boot-starter
 	// Swagger API
@@ -45,10 +46,10 @@ dependencies {
 
 	compileOnly 'org.projectlombok:lombok:1.18.22'
 
-	// When Develop
+	// When Develop (DB)
 	runtimeOnly 'com.h2database:h2'
 
-	// When Production
+	// When Production (DB)
 	// https://mvnrepository.com/artifact/org.postgresql/postgresql
 	runtimeOnly 'org.postgresql:postgresql'
 
