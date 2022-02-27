@@ -9,7 +9,7 @@ name: Java CI with Gradle
 
 on:
   push:
-    branches: [ master, hotfix ]
+    branches: [ master, hotfix, develop ]
   pull_request:
     branches: [ master, hotfix ]
 
