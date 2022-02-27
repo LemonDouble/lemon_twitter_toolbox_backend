@@ -9,6 +9,7 @@ import com.lemondouble.lemonToolbox.api.repository.RegisteredServiceRepository;
 import com.lemondouble.lemonToolbox.api.repository.entity.OAuthToken;
 import com.lemondouble.lemonToolbox.api.repository.entity.RegisteredService;
 import com.lemondouble.lemonToolbox.api.repository.entity.ServiceUser;
+import com.lemondouble.lemonToolbox.api.service.SqsMessageService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.aws.messaging.listener.Acknowledgment;
 import org.springframework.cloud.aws.messaging.listener.SqsMessageDeletionPolicy;
@@ -26,11 +27,13 @@ public class ReadyServiceListener {
 
     private final OAuthTokenRepository oAuthTokenRepository;
     private final RegisteredServiceRepository registeredServiceRepository;
+    private final SqsMessageService sqsMessageService;
 
 
-    public ReadyServiceListener(OAuthTokenRepository oAuthTokenRepository, RegisteredServiceRepository registeredServiceRepository) {
+    public ReadyServiceListener(OAuthTokenRepository oAuthTokenRepository, RegisteredServiceRepository registeredServiceRepository , SqsMessageService sqsMessageService) {
         this.oAuthTokenRepository = oAuthTokenRepository;
         this.registeredServiceRepository = registeredServiceRepository;
+        this.sqsMessageService = sqsMessageService;
     }
 
     /**
@@ -60,6 +63,8 @@ public class ReadyServiceListener {
 
             registeredService.setReady(true);
             log.debug("ReadyServiceListener : set registeredService Ready = true Complete");
+
+            sqsMessageService.sendToTweetNotificationQueue(oauthToken.get(0));
 
             ack.acknowledge();
         }catch(Exception e){
