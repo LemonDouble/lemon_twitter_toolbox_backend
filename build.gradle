@@ -5,7 +5,7 @@ plugins {
 }
 
 group = 'com.lemondouble'
-version = '0.0.1-SNAPSHOT'
+version = '1'
 sourceCompatibility = '11'
 
 configurations {
@@ -36,9 +36,8 @@ dependencies {
 	implementation 'org.springframework.cloud:spring-cloud-starter-aws-messaging:2.2.6.RELEASE'
 	implementation 'org.springframework.cloud:spring-cloud-aws-autoconfigure:2.2.6.RELEASE'
 
-	// AWS Service Mocking Lib
-	// https://mvnrepository.com/artifact/cloud.localstack/localstack-utils
-	testImplementation 'cloud.localstack:localstack-utils:0.2.20'
+	// SQS Mock Lib (https://github.com/jojoldu/spring-boot-aws-mock)
+	implementation 'com.github.jojoldu.spring-boot-aws-mock:mock-sqs-spring-boot-starter:0.4.1'
 
 	// https://mvnrepository.com/artifact/io.springfox/springfox-boot-starter
 	// Swagger API

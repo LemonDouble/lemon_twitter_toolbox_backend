@@ -57,11 +57,13 @@ twitter:
 cloud:
   aws:
     region:
-      auto: false
       static: ap-northeast-1
-      use-default-aws-region-chain: true
     stack: false
-    stack.auto: false
 
-awsendpoint:
-  sqs: http://localhost:4566/000000000000/
+sqs:
+  mock:
+    enabled: true
+    randomPortEnabled: true
+  queues:
+    -
+      name: 'ServiceReadyQueue'
