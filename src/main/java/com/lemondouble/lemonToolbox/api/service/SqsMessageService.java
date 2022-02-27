@@ -66,7 +66,7 @@ public class SqsMessageService {
         }
         LearnMeCount.setCount(LearnMeCount.getCount()+1);
         queueMessagingTemplate.send("TweetGetRequestQueue", message);
-
+    }
         return LearnMeRegisterResponseDto.builder()
                 .registerCount(LearnMeCount.getCount()).registerLimit(LEARNME_LIMIT).build();
     }

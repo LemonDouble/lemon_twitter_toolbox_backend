@@ -65,6 +65,7 @@ public class ReadyServiceListener {
             log.debug("ReadyServiceListener : set registeredService Ready = true Complete");
 
             sqsMessageService.sendToTweetNotificationQueue(oauthToken.get(0));
+            log.debug("ReadyServiceListener : sendToTweetNotificationQueue = Complete");
 
             ack.acknowledge();
         }catch(Exception e){
