@@ -6,6 +6,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.lemondouble.lemonToolbox.api.dto.sqs.queueUserRequestDto;
+import com.lemondouble.lemonToolbox.api.dto.sqs.queueNotificationRequestDto;
 import com.lemondouble.lemonToolbox.api.repository.entity.OAuthToken;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.aws.messaging.core.QueueMessagingTemplate;
@@ -46,8 +47,19 @@ public class SqsMessageService {
         Message<String> message = dtoToMessage(requestDto);
         //queueMessagingTemplate.send("dummy", message);
         queueMessagingTemplate.send("TweetGetRequestQueue", message);
+    }
 
+    public void sendToTweetNotificationQueue(OAuthToken RequestUserOAuthToken) throws JsonProcessingException {
+        queueNotificationRequestDto requestDto = queueNotificationRequestDto.builder()
+                .userId(RequestUserOAuthToken.getOauthUserId().toString())
+                .AccessToken(RequestUserOAuthToken.getAccessToken())
+                .AccessSecret(RequestUserOAuthToken.getAccessTokenSecret())
+                .message("[Twitter Toolbox] 훈련이 완료되었어요! 이제 나를 따라하는 봇을 사용해 볼 수 있어요! https://toolbox.lemondouble.com/learn-me #LemonTwitterToolbox")
+                .build();
 
+        Message<String> message = dtoToMessage(requestDto);
+        //queueMessagingTemplate.send("dummy", message);
+        queueMessagingTemplate.send("TweetNotificationQueue", message);
     }
 
 
