@@ -34,16 +34,12 @@ server:
 
 logging:
   level:
-    org.hibernate.type: trace
     com:
-      lemondouble: debug
       amazonaws:
         internal:
           InstanceMetadataServiceResourceFetcher: error
         util:
           EC2MetadataUtils: error
-
-
 
 jwt:
   header: Authorization
@@ -57,8 +53,9 @@ twitter:
 cloud:
   aws:
     region:
-      static: ap-northeast-1
-    stack: false
+      static: ap-northeast-2
+    stack:
+      auto: false
 
 sqs:
   mock:
