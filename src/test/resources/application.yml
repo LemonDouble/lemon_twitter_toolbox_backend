@@ -1,4 +1,6 @@
 spring:
+  main:
+    allow-bean-definition-overriding: true
 
   mvc:
     pathmatch:
@@ -56,15 +58,3 @@ cloud:
       static: ap-northeast-2
     stack:
       auto: false
-
-sqs:
-  mock:
-    enabled: true
-    randomPortEnabled: true
-  queues:
-    -
-      name: 'ServiceReadyQueue'
-    -
-      name: 'TweetNotificationQueue'
-    -
-      name: 'ServiceReadyQueue'

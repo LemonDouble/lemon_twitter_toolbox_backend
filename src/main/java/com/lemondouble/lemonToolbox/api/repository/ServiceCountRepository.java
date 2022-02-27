@@ -7,5 +7,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
 
-public interface ServiceCountRepository extends JpaRepository<ServiceCount, Long> {
+public interface ServiceCountRepository extends JpaRepository<ServiceCount, String> {
 }
