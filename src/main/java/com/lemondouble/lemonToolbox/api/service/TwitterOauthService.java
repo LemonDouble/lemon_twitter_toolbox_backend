@@ -151,7 +151,6 @@ public class TwitterOauthService {
                 .oauthUserId(accessToken.getUserId())
                 .serviceUser(savedUser).build();
 
-
         oAuthTokenRepository.save(oAuthToken);
 
         return savedUser;

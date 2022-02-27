@@ -2,6 +2,7 @@ package com.lemondouble.lemonToolbox.api.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.lemondouble.lemonToolbox.api.dto.OAuth.TokenDto;
+import com.lemondouble.lemonToolbox.api.dto.RegisteredService.LearnMeRegisterResponseDto;
 import com.lemondouble.lemonToolbox.api.dto.RegisteredService.RegisteredServiceModifyDto;
 import com.lemondouble.lemonToolbox.api.dto.RegisteredService.RegisteredServiceResponseDto;
 import com.lemondouble.lemonToolbox.api.repository.entity.OAuthToken;
@@ -87,7 +88,7 @@ public class RegisteredServiceController {
     @ApiOperation(value = "Learn Me 서비스 등록 및 사용")
     @ResponseStatus(value = HttpStatus.CREATED)
     @PostMapping("/learn_me")
-    public ResponseEntity<Void> usingLearnMe() throws JsonProcessingException {
+    public ResponseEntity<LearnMeRegisterResponseDto> usingLearnMe() throws JsonProcessingException {
         Long currentId = getUserId();
 
         // 현재 유저를 learn Me 서비스에 가입시킨다
@@ -95,13 +96,14 @@ public class RegisteredServiceController {
         registeredServiceService.joinLearnMe(currentId);
 
         // 현재 유저의 oAuthToken 으로 SQS Queue 에 서비스 요청 날린다.
+        // 만약 Exception
         OAuthToken oAuthToken = twitterUserService.getOAuthTokenByUserId(currentId);
-        sqsMessageService.sendToRequestTweetQueue(oAuthToken);
+        LearnMeRegisterResponseDto responseDto = sqsMessageService.sendToRequestTweetQueue(oAuthToken);
 
         // 다음 사용 가능 시간을 내일 이 시간으로 변경
         registeredServiceService.setNextUseTime(currentId, ServiceType.LEARNME, LocalDateTime.now().plusDays(1));
 
-        return new ResponseEntity<>(null, HttpStatus.CREATED);
+        return new ResponseEntity<>(responseDto, HttpStatus.CREATED);
     }
 
     private Long getUserId() {
