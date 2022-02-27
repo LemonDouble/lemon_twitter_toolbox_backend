@@ -44,7 +44,11 @@ dependencies {
 	implementation group: 'io.springfox', name: 'springfox-boot-starter', version: '3.0.0'
 
 	compileOnly 'org.projectlombok:lombok:1.18.22'
-	
+
+	// When Develop
+	runtimeOnly 'com.h2database:h2'
+
+	// When Production
 	// https://mvnrepository.com/artifact/org.postgresql/postgresql
 	runtimeOnly 'org.postgresql:postgresql'
 
