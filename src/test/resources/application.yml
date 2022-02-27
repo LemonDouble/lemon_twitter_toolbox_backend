@@ -67,3 +67,7 @@ sqs:
   queues:
     -
       name: 'ServiceReadyQueue'
+    -
+      name: 'TweetNotificationQueue'
+    -
+      name: 'ServiceReadyQueue'
