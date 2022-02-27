@@ -23,14 +23,17 @@ public class RegisteredService {
     private ServiceType serviceType;
 
     // 해당 서비스 준비되었는지?
+    @Builder.Default
     @Setter
     private boolean isReady = false;
 
     // 해당 서비스를 공개할 것인지? (True면 아무나 볼 수 있게)
+    @Builder.Default
     @Setter
     private boolean isPublic = false;
 
     // 해당 서비스 다음 사용가능 시간이 언제인지?
+    @Builder.Default
     @Setter
     private LocalDateTime canUseTime = LocalDateTime.now();
 }
