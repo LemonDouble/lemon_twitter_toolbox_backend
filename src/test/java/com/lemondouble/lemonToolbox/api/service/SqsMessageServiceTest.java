@@ -10,10 +10,14 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -54,9 +58,10 @@ class SqsMessageServiceTest {
         sqsMessageService.sendToRequestTweetQueue(token);
     }
 
+    // 한명은 깍두기
     @Test
     @Transactional
-    public void sendMessage_300번이후_실패() throws JsonProcessingException, InterruptedException {
+    public void sendMessage_301번이후_실패() throws JsonProcessingException, InterruptedException {
         //given
 
         //when
@@ -65,9 +70,24 @@ class SqsMessageServiceTest {
                 .accessTokenSecret("SECRET")
                 .oauthUserId(77777L).build();
 
-        for(int i =0 ; i < 301; i++){
-            sqsMessageService.sendToRequestTweetQueue(token);
+        int numberOfExcute = 301;
+        ExecutorService service = Executors.newFixedThreadPool(10);
+        CountDownLatch latch = new CountDownLatch(numberOfExcute);
+
+
+        for (int i = 0; i < numberOfExcute; i++) {
+            service.execute(() -> {
+                try {
+                    sqsMessageService.sendToRequestTweetQueue(token);
+                } catch (ObjectOptimisticLockingFailureException oe) {
+                    System.out.println("oe = " + oe.toString());
+                } catch (Exception e) {
+                    System.out.println(e.getMessage());
+                }
+                latch.countDown();
+            });
         }
+        latch.await();
 
         //then
         assertThrows(ResponseStatusException.class, ()->{
