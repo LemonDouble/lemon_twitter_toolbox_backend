@@ -127,8 +127,12 @@ public class TwitterOauthService {
             log.info("findUserByAccessToken : Access Token Revoke 되어 최신화");
             log.info("before: token={} , secret={}", OAuthList.get(0).getAccessToken(), OAuthList.get(0).getAccessTokenSecret());
             log.info("after: token={} , secret={}", accessToken.getToken(), accessToken.getTokenSecret());
-            OAuthList.get(0).setAccessToken(token);
-            OAuthList.get(0).setAccessTokenSecret(token);
+            Long oAuthTokenId = OAuthList.get(0).getId();
+            OAuthToken oAuthToken = oAuthTokenRepository.findById(oAuthTokenId)
+                    .orElseThrow(()-> {throw new RuntimeException("findUserByAccessToken -> 최신화 하려 했는데 Token이 없습니다??");});
+            oAuthToken.setAccessToken(token);
+            oAuthToken.setAccessTokenSecret(tokenSecret);
+            oAuthTokenRepository.save(oAuthToken);
         }
 
         // 해당 유저 반환
