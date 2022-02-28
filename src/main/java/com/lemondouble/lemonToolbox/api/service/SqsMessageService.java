@@ -107,6 +107,16 @@ public class SqsMessageService {
         queueMessagingTemplate.send("TweetNotificationQueue", message);
     }
 
+    public void sendToLearnMeTrainDataDeleteRequestQueue(OAuthToken oAuthToken) throws JsonProcessingException {
+        queueNotificationRequestDto requestDto = queueNotificationRequestDto.builder()
+                .finished("spring_request_delete")
+                .userId(oAuthToken.getOauthUserId().toString())
+                .build();
+
+        Message<String> message = dtoToMessage(requestDto);
+        queueMessagingTemplate.send("LearnMeTrainDataDeleteRequestQueue", message);
+    }
+
     @Transactional
     public void processingServiceReadyResponseDto(ServiceReadyResponseDto serviceReadyResponseDto){
         try{

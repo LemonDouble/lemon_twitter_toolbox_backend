@@ -45,6 +45,29 @@ public class RegisteredServiceService {
         }
     }
 
+    /**
+     * Learn Me 서비스 탈퇴. <br>
+     * 만약 이미 탈퇴되어 있다면 무시한다.
+     * 탈퇴되어 있지 않다면, 탈퇴시킨다.
+     */
+    @Transactional
+    public void unJoinLearnMe(Long userId){
+        ServiceUser serviceUser = getServiceUserByUserId(userId);
+
+        List<RegisteredService> findRegisteredData =
+                registeredServiceRepository.findByServiceUserAndServiceType(serviceUser, ServiceType.LEARNME);
+
+        if(findRegisteredData.size() > 1){
+            throw new RuntimeException("unJoinLearnMe Error! 한 유저가 Learn Me 서비스에 중복가입되어 있습니다!");
+       }
+
+        // 탈퇴되어 있지 않은 경우, 탈퇴시킨다.
+        if(findRegisteredData.size() == 1){
+            RegisteredService registeredService = findRegisteredData.get(0);
+            registeredServiceRepository.delete(registeredService);
+        }
+    }
+
     @Transactional
     public void setNextUseTime(Long userId, ServiceType serviceType, LocalDateTime nextUseTime){
         ServiceUser serviceUser = getServiceUserByUserId(userId);
