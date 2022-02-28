@@ -124,6 +124,9 @@ public class TwitterOauthService {
         String tokenSecret = accessToken.getTokenSecret();
 
         if(!OAuthList.get(0).getAccessToken().equals(token) || !OAuthList.get(0).getAccessTokenSecret().equals(tokenSecret)){
+            log.info("findUserByAccessToken : Access Token Revoke 되어 최신화");
+            log.info("before: token={} , secret={}", OAuthList.get(0).getAccessToken(), OAuthList.get(0).getAccessTokenSecret());
+            log.info("after: token={} , secret={}", accessToken.getToken(), accessToken.getTokenSecret());
             OAuthList.get(0).setAccessToken(token);
             OAuthList.get(0).setAccessTokenSecret(token);
         }
