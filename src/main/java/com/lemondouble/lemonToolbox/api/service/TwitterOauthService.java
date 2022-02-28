@@ -8,9 +8,11 @@ import com.lemondouble.lemonToolbox.api.repository.entity.OAuthType;
 import com.lemondouble.lemonToolbox.api.repository.entity.ServiceUser;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.server.ResponseStatusException;
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
 import twitter4j.TwitterFactory;
@@ -56,6 +58,7 @@ public class TwitterOauthService {
       * Twitter4j 라이브러리는 항상 Request Token을 같이 보내 줘야 Access Token을 받을 수 있는 문제가 있어 직접 Http 요청한다. <br>
       * 로그인시 Redirect 일어나므로 프론트엔드에서 전역 상태로 Request Token을 항상 들고 있기도 힘들고, <br>
       * 백엔드에서도 State를 하나라도 줄이기 위해 굳이 Request Token을 들고있을 이유가 없다.
+      * 400, 500 Error일땐 Exception 던진다.
      */
     public AccessToken getAccessTokenFromOAuthToken(String oauth_token, String oauth_verifier) throws TwitterException {
         String responseBodyString = webClient.post()
@@ -63,8 +66,13 @@ public class TwitterOauthService {
                         .queryParam("oauth_token", oauth_token)
                         .queryParam("oauth_verifier", oauth_verifier).build())
                 .retrieve()
+                .onStatus(HttpStatus::is4xxClientError,
+                        clientResponse -> {throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "error on getAccessToken, " + clientResponse.statusCode());})
+                .onStatus(HttpStatus::is5xxServerError,
+                        clientResponse -> {throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "error on getAccessToken " + clientResponse.statusCode());})
                 .bodyToMono(String.class).block();
 
+        assert responseBodyString != null;
         TwitterAccessTokenDto twitterAccessTokenDto = parseToAccessToken(responseBodyString);
 
         return new AccessToken(twitterAccessTokenDto.getAccessToken(), twitterAccessTokenDto.getAccessTokenSecret());
