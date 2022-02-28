@@ -15,7 +15,6 @@ import java.util.Collections;
 import java.util.List;
 
 @Configuration
-@Profile("dev")
 public class SwaggerConfig {
 
     @Bean

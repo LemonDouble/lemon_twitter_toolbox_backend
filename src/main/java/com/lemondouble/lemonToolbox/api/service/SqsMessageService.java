@@ -82,17 +82,17 @@ public class SqsMessageService {
         Message<String> message = dtoToMessage(requestDto);
 
         // serviceCountRepository 의 1번 entity : Learn-Me count
-        ServiceCount learnmeCount = serviceCountRepository.findById("LEARNME")
-                .orElseThrow(() -> {
-                    throw new RuntimeException("LEARNME Count가 없습니다!");
-                });
+        ServiceCount learnmeCount = serviceCountRepository.findByServiceCountForUpdate("LEARNME")
+                .orElseThrow(() -> {throw new RuntimeException("LEARNME 카운트가 없습니다!");});
 
         if(learnmeCount.getCount() > LEARNME_LIMIT){
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "오늘 사용가능한 사람 수를 넘었습니다!");
         }
-        learnmeCount.setCount(learnmeCount.getCount()+1);
-        queueMessagingTemplate.send("TweetGetRequestQueue", message);
 
+        queueMessagingTemplate.send("dummyQueue", message);
+
+        learnmeCount.setCount(learnmeCount.getCount()+1);
+        serviceCountRepository.save(learnmeCount);
 
         return LearnMeRegisterResponseDto.builder()
                 .registerCount(learnmeCount.getCount()).registerLimit(LEARNME_LIMIT).build();
