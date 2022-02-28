@@ -13,6 +13,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.ArrayList;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 
@@ -32,10 +34,7 @@ class SqsMessageServiceTest {
     @Transactional
     void init(){
         amazonSQS.createQueue("TweetGetRequestQueue");
-        ServiceCount learnme = new ServiceCount();
-        learnme.setServiceName("LEARNME");
-        learnme.setCount(0L);
-        serviceCountRepository.save(learnme);
+
     }
 
 
@@ -49,16 +48,15 @@ class SqsMessageServiceTest {
                 .accessToken("TOKEN")
                 .accessTokenSecret("SECRET")
                 .oauthUserId(77777L).build();
-        sqsMessageService.sendToRequestTweetQueue(token);
-
         //when
 
         //then
+        sqsMessageService.sendToRequestTweetQueue(token);
     }
 
     @Test
     @Transactional
-    public void sendMessage_300번이후_실패() throws JsonProcessingException {
+    public void sendMessage_300번이후_실패() throws JsonProcessingException, InterruptedException {
         //given
 
         //when
@@ -67,8 +65,7 @@ class SqsMessageServiceTest {
                 .accessTokenSecret("SECRET")
                 .oauthUserId(77777L).build();
 
-        for(int i =0; i <= 300; i++){
-            // request 300번 보냄
+        for(int i =0 ; i < 301; i++){
             sqsMessageService.sendToRequestTweetQueue(token);
         }
 
@@ -76,5 +73,6 @@ class SqsMessageServiceTest {
         assertThrows(ResponseStatusException.class, ()->{
             sqsMessageService.sendToRequestTweetQueue(token);
         });
+;
     }
 }

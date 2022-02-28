@@ -31,6 +31,9 @@ dependencies {
 	//WebClient
 	implementation 'org.springframework.boot:spring-boot-starter-webflux:2.6.3'
 
+	// Redis
+	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+
 	// AWS SQS
 	implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'
 	implementation 'org.springframework.cloud:spring-cloud-starter-aws-messaging:2.2.6.RELEASE'

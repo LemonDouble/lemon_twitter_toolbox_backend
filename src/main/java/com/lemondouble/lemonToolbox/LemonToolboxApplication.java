@@ -16,6 +16,7 @@ public class LemonToolboxApplication {
 		SpringApplication.run(LemonToolboxApplication.class, args);
 
 	}
+
 	// 초기화시
 	// insert into service_count values('LEARNME', 0);
 }
