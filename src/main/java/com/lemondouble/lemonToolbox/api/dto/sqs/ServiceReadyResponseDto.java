@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 public class ServiceReadyResponseDto {
-
+    private String finished;
     private Long oAuthUserId;
     private OAuthType oAuthType;
     private ServiceType serviceName;

@@ -6,11 +6,16 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.lemondouble.lemonToolbox.api.dto.RegisteredService.LearnMeRegisterResponseDto;
+import com.lemondouble.lemonToolbox.api.dto.sqs.ServiceReadyResponseDto;
 import com.lemondouble.lemonToolbox.api.dto.sqs.queueUserRequestDto;
 import com.lemondouble.lemonToolbox.api.dto.sqs.queueNotificationRequestDto;
+import com.lemondouble.lemonToolbox.api.repository.OAuthTokenRepository;
+import com.lemondouble.lemonToolbox.api.repository.RegisteredServiceRepository;
 import com.lemondouble.lemonToolbox.api.repository.ServiceCountRepository;
 import com.lemondouble.lemonToolbox.api.repository.entity.OAuthToken;
+import com.lemondouble.lemonToolbox.api.repository.entity.RegisteredService;
 import com.lemondouble.lemonToolbox.api.repository.entity.ServiceCount;
+import com.lemondouble.lemonToolbox.api.repository.entity.ServiceUser;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.aws.messaging.core.QueueMessagingTemplate;
@@ -21,6 +26,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.List;
+
 @Service
 @Slf4j
 public class SqsMessageService {
@@ -28,13 +35,22 @@ public class SqsMessageService {
     private final QueueMessagingTemplate queueMessagingTemplate;
     private final ObjectMapper objectMapper;
     private final ServiceCountRepository serviceCountRepository;
+    private final OAuthTokenRepository oAuthTokenRepository;
+    private final RegisteredServiceRepository registeredServiceRepository;
+
+    private Long count = 0L;
 
     @Value("${service-limit.learnme}")
     private Long LEARNME_LIMIT;
 
-    public SqsMessageService(AmazonSQS amazonSQS, ServiceCountRepository serviceCountRepository) {
+    public SqsMessageService(AmazonSQS amazonSQS,
+                             ServiceCountRepository serviceCountRepository,
+                             OAuthTokenRepository oAuthTokenRepository,
+                             RegisteredServiceRepository registeredServiceRepository) {
         this.queueMessagingTemplate = new QueueMessagingTemplate((AmazonSQSAsync) amazonSQS);
         this.serviceCountRepository = serviceCountRepository;
+        this.oAuthTokenRepository = oAuthTokenRepository;
+        this.registeredServiceRepository = registeredServiceRepository;
         // SQS 메세지 보낼때는 Snake Case로 보낸다.
         this.objectMapper = new ObjectMapper().setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE);
     }
@@ -89,6 +105,34 @@ public class SqsMessageService {
 
         Message<String> message = dtoToMessage(requestDto);
         queueMessagingTemplate.send("TweetNotificationQueue", message);
+    }
+
+    @Transactional
+    public void processingServiceReadyResponseDto(ServiceReadyResponseDto serviceReadyResponseDto){
+        try{
+            count++;
+            log.debug("processing Count : {}", count);
+            log.debug("ReadyServiceListener data : {}", serviceReadyResponseDto.toString());
+            List<OAuthToken> oauthToken = oAuthTokenRepository.findByOauthTypeAndOauthUserId(
+                    serviceReadyResponseDto.getOAuthType(),
+                    serviceReadyResponseDto.getOAuthUserId()
+            );
+            ServiceUser serviceUser = oauthToken.get(0).getServiceUser();
+            log.debug("ReadyServiceListener : Get Service User Complete");
+
+            RegisteredService registeredService = registeredServiceRepository.findByServiceUserAndServiceType(
+                    serviceUser,
+                    serviceReadyResponseDto.getServiceName()
+            ).get(0);
+
+            registeredService.setReady(true);
+            log.debug("ReadyServiceListener : set registeredService Ready = true Complete");
+
+            sendToTweetNotificationQueue(oauthToken.get(0));
+            log.debug("ReadyServiceListener : sendToTweetNotificationQueue = Complete");
+        }catch(Exception e){
+            log.error("ReadyServiceListener : One Data Processing Failed {}" , e.toString());
+        }
     }
 
 

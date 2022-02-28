@@ -56,7 +56,7 @@ public class TwitterUserService {
     public OAuthToken getOAuthTokenByUserId(Long userId) throws RuntimeException{
         List<OAuthToken> findTokens = oAuthTokenRepository.findByOauthTypeAndServiceUserId(OAuthType.TWITTER, userId);
         if(findTokens.size() != 1){
-            log.error("TwitterUserService.getOAuthTokenByUserId 무결성 Error, 한 고유 ID에 유저가 두명 이상! userId = {}",
+            log.error("TwitterUserService.getOAuthTokenByUserId 무결성 Error, 한 고유 ID에 유저가 두명 이상이거나 없음!! userId = {}",
                     userId);
             throw new RuntimeException("findByOauthTypeAndOAuthUserId Error! OAUTH_TYPE = "+
                     OAuthType.TWITTER +" userId = " + userId);
