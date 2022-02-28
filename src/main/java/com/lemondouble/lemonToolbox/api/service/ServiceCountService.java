@@ -1,5 +1,6 @@
 package com.lemondouble.lemonToolbox.api.service;
 
+import com.lemondouble.lemonToolbox.api.dto.RegisteredService.LearnMeCanUseResponseDto;
 import com.lemondouble.lemonToolbox.api.repository.ServiceCountRepository;
 import com.lemondouble.lemonToolbox.api.repository.entity.ServiceCount;
 import org.springframework.beans.factory.annotation.Value;
@@ -19,12 +20,16 @@ public class ServiceCountService {
     }
 
     @Transactional(readOnly = true)
-    public boolean canUseLearnMeService(){
+    public LearnMeCanUseResponseDto canUseLearnMeService(){
         ServiceCount learnmeServiceCount = serviceCountRepository.findById("LEARNME").orElseThrow(() -> {
             throw new RuntimeException("LEARNME Count가 없습니다!");
         });
 
-        return learnmeServiceCount.getCount() <= (LEARNME_LIMIT-1);
+        return LearnMeCanUseResponseDto.builder()
+                .canUse(learnmeServiceCount.getCount() <= (LEARNME_LIMIT-1))
+                .registerCount(learnmeServiceCount.getCount())
+                .registerLimit(LEARNME_LIMIT)
+                .build();
     }
 
 }
