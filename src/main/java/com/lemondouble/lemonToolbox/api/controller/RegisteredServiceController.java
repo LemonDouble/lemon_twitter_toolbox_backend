@@ -1,7 +1,7 @@
 package com.lemondouble.lemonToolbox.api.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.lemondouble.lemonToolbox.api.dto.OAuth.TokenDto;
+import com.lemondouble.lemonToolbox.api.dto.RegisteredService.LearnMeCanUseResponseDto;
 import com.lemondouble.lemonToolbox.api.dto.RegisteredService.LearnMeRegisterResponseDto;
 import com.lemondouble.lemonToolbox.api.dto.RegisteredService.RegisteredServiceModifyDto;
 import com.lemondouble.lemonToolbox.api.dto.RegisteredService.RegisteredServiceResponseDto;
@@ -9,16 +9,15 @@ import com.lemondouble.lemonToolbox.api.repository.entity.OAuthToken;
 import com.lemondouble.lemonToolbox.api.repository.entity.RegisteredService;
 import com.lemondouble.lemonToolbox.api.repository.entity.ServiceType;
 import com.lemondouble.lemonToolbox.api.service.RegisteredServiceService;
+import com.lemondouble.lemonToolbox.api.service.ServiceCountService;
 import com.lemondouble.lemonToolbox.api.service.SqsMessageService;
 import com.lemondouble.lemonToolbox.api.service.TwitterUserService;
 import com.lemondouble.lemonToolbox.api.util.SecurityUtil;
-import com.lemondouble.lemonToolbox.jwt.TokenProvider;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
 import javax.validation.Valid;
 import java.time.LocalDateTime;
@@ -33,12 +32,18 @@ public class RegisteredServiceController {
     private final RegisteredServiceService registeredServiceService;
     private final TwitterUserService twitterUserService;
     private final SqsMessageService sqsMessageService;
+    private final ServiceCountService serviceCountService;
 
 
-    public RegisteredServiceController(RegisteredServiceService registeredServiceService, TwitterUserService twitterUserService, SqsMessageService sqsMessageService) {
+    public RegisteredServiceController(
+            RegisteredServiceService registeredServiceService,
+            TwitterUserService twitterUserService,
+            SqsMessageService sqsMessageService,
+            ServiceCountService serviceCountService) {
         this.registeredServiceService = registeredServiceService;
         this.twitterUserService = twitterUserService;
         this.sqsMessageService = sqsMessageService;
+        this.serviceCountService = serviceCountService;
     }
 
 
@@ -91,19 +96,28 @@ public class RegisteredServiceController {
     public ResponseEntity<LearnMeRegisterResponseDto> usingLearnMe() throws JsonProcessingException {
         Long currentId = getUserId();
 
+        // 현재 유저의 oAuthToken 으로 SQS Queue 에 서비스 요청 날린다.
+        // 만약 Exception 발생하면 나가진다.
+        OAuthToken oAuthToken = twitterUserService.getOAuthTokenByUserId(currentId);
+        LearnMeRegisterResponseDto responseDto = sqsMessageService.sendToRequestTweetQueue(oAuthToken);
+
         // 현재 유저를 learn Me 서비스에 가입시킨다
         // 단, 중복 가입은 안 되므로, 이미 가입되어 있다면 무시된다.
         registeredServiceService.joinLearnMe(currentId);
 
-        // 현재 유저의 oAuthToken 으로 SQS Queue 에 서비스 요청 날린다.
-        // 만약 Exception
-        OAuthToken oAuthToken = twitterUserService.getOAuthTokenByUserId(currentId);
-        LearnMeRegisterResponseDto responseDto = sqsMessageService.sendToRequestTweetQueue(oAuthToken);
-
-        // 다음 사용 가능 시간을 내일 이 시간으로 변경
-        registeredServiceService.setNextUseTime(currentId, ServiceType.LEARNME, LocalDateTime.now().plusDays(1));
+        // 다음 사용 가능 시간을 일주일 뒤 이 시간으로 변경
+        registeredServiceService.setNextUseTime(currentId, ServiceType.LEARNME, LocalDateTime.now().plusDays(7));
 
         return new ResponseEntity<>(responseDto, HttpStatus.CREATED);
+    }
+
+    @ApiOperation(value = "Learn Me 서비스 사용 가능 여부 조회(하루 Limit 수 넘어갔는지?)")
+    @GetMapping("/learn_me/can-use")
+    public ResponseEntity<LearnMeCanUseResponseDto> checkCanUseLearnMe(){
+        boolean canUse = serviceCountService.canUseLearnMeService();
+        LearnMeCanUseResponseDto responseDto = LearnMeCanUseResponseDto.builder().canUse(canUse).build();
+
+        return new ResponseEntity<>(responseDto, HttpStatus.OK);
     }
 
     private Long getUserId() {

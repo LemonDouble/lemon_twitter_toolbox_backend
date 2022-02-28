@@ -12,6 +12,7 @@ import com.lemondouble.lemonToolbox.api.repository.ServiceCountRepository;
 import com.lemondouble.lemonToolbox.api.repository.entity.OAuthToken;
 import com.lemondouble.lemonToolbox.api.repository.entity.ServiceCount;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.aws.messaging.core.QueueMessagingTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.messaging.Message;
@@ -28,7 +29,8 @@ public class SqsMessageService {
     private final ObjectMapper objectMapper;
     private final ServiceCountRepository serviceCountRepository;
 
-    private final Long LEARNME_LIMIT = 300L;
+    @Value("${service-limit.learnme}")
+    private Long LEARNME_LIMIT;
 
     public SqsMessageService(AmazonSQS amazonSQS, ServiceCountRepository serviceCountRepository) {
         this.queueMessagingTemplate = new QueueMessagingTemplate((AmazonSQSAsync) amazonSQS);
