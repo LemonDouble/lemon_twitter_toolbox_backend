@@ -108,7 +108,7 @@ public class RegisteredServiceController {
         // 다음 사용 가능 시간을 일주일 뒤 이 시간으로 변경
         registeredServiceService.setNextUseTime(currentId, ServiceType.LEARNME, LocalDateTime.now().plusDays(7));
 
-        return new ResponseEntity<>(responseDto, HttpStatus.CREATED);
+        return new ResponseEntity<>(LearnMeRegisterResponseDto.builder().registerCount(1L).registerLimit(300L).build(), HttpStatus.CREATED);
     }
 
     @ApiOperation(value = "Learn Me 서비스 사용 가능 여부 조회(하루 Limit 수 넘어갔는지?)")
@@ -118,6 +118,22 @@ public class RegisteredServiceController {
         LearnMeCanUseResponseDto responseDto = LearnMeCanUseResponseDto.builder().canUse(canUse).build();
 
         return new ResponseEntity<>(responseDto, HttpStatus.OK);
+    }
+
+    @ApiOperation(value = "Learn Me 탈퇴 및 데이터 삭제")
+    @DeleteMapping("/learn_me")
+    public ResponseEntity<Void> unRegisterLearnMe() throws JsonProcessingException {
+        Long currentId = getUserId();
+
+        // 현재 유저의 oAuthToken 으로 SQS Queue 에 서비스 요청 날린다.
+        OAuthToken oAuthToken = twitterUserService.getOAuthTokenByUserId(currentId);
+        sqsMessageService.sendToLearnMeTrainDataDeleteRequestQueue(oAuthToken);
+
+        // 현재 유저를 learn Me 서비스에서 탈퇴시킨다.
+        // 단, 이미 탈퇴되어 있다면 무시된다.
+        registeredServiceService.unJoinLearnMe(currentId);
+
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     private Long getUserId() {
