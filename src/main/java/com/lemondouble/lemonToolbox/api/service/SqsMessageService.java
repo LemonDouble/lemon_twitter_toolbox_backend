@@ -89,7 +89,7 @@ public class SqsMessageService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "오늘 사용가능한 사람 수를 넘었습니다!");
         }
 
-        queueMessagingTemplate.send("dummyQueue", message);
+        queueMessagingTemplate.send("TweetGetRequestQueue", message);
 
         learnmeCount.setCount(learnmeCount.getCount()+1);
         serviceCountRepository.save(learnmeCount);

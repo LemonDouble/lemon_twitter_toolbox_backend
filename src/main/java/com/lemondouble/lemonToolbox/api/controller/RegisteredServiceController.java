@@ -108,7 +108,7 @@ public class RegisteredServiceController {
         // 다음 사용 가능 시간을 일주일 뒤 이 시간으로 변경
         registeredServiceService.setNextUseTime(currentId, ServiceType.LEARNME, LocalDateTime.now().plusDays(7));
 
-        return new ResponseEntity<>(LearnMeRegisterResponseDto.builder().registerCount(1L).registerLimit(300L).build(), HttpStatus.CREATED);
+        return new ResponseEntity<>(responseDto, HttpStatus.CREATED);
     }
 
     @ApiOperation(value = "Learn Me 서비스 사용 가능 여부 조회(하루 Limit 수 넘어갔는지?)")
