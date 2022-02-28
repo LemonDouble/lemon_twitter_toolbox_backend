@@ -114,8 +114,7 @@ public class RegisteredServiceController {
     @ApiOperation(value = "Learn Me 서비스 사용 가능 여부 조회(하루 Limit 수 넘어갔는지?)")
     @GetMapping("/learn_me/can-use")
     public ResponseEntity<LearnMeCanUseResponseDto> checkCanUseLearnMe(){
-        boolean canUse = serviceCountService.canUseLearnMeService();
-        LearnMeCanUseResponseDto responseDto = LearnMeCanUseResponseDto.builder().canUse(canUse).build();
+        LearnMeCanUseResponseDto responseDto = serviceCountService.canUseLearnMeService();
 
         return new ResponseEntity<>(responseDto, HttpStatus.OK);
     }
