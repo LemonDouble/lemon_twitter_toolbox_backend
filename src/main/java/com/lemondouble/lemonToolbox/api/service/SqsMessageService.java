@@ -53,6 +53,7 @@ public class SqsMessageService {
     @Transactional
     public LearnMeRegisterResponseDto sendToRequestTweetQueue(OAuthToken RequestUserOAuthToken) throws JsonProcessingException {
         queueUserRequestDto requestDto = queueUserRequestDto.builder()
+                .finished("spring_request_fetch_tweet")
                 .userId(RequestUserOAuthToken.getOauthUserId().toString())
                 .AccessToken(RequestUserOAuthToken.getAccessToken())
                 .AccessSecret(RequestUserOAuthToken.getAccessTokenSecret())
@@ -79,6 +80,7 @@ public class SqsMessageService {
 
     public void sendToTweetNotificationQueue(OAuthToken RequestUserOAuthToken) throws JsonProcessingException {
         queueNotificationRequestDto requestDto = queueNotificationRequestDto.builder()
+                .finished("spring_success_marking")
                 .userId(RequestUserOAuthToken.getOauthUserId().toString())
                 .AccessToken(RequestUserOAuthToken.getAccessToken())
                 .AccessSecret(RequestUserOAuthToken.getAccessTokenSecret())

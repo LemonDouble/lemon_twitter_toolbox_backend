@@ -8,6 +8,7 @@ import lombok.Data;
 @Builder
 @AllArgsConstructor
 public class queueNotificationRequestDto {
+    private String finished;
     private String AccessToken;
     private String AccessSecret;
     private String userId;
