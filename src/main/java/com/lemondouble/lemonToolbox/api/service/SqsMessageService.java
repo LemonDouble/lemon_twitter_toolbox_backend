@@ -23,6 +23,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -66,7 +67,10 @@ public class SqsMessageService {
      * 4. Bert Model 을 통해 해당 트윗들을 Embedding 해 S3에 .pickle 로 저장한다. <br>
      * 5. 작업 완료 알람을 보내고 트위터에 알람을 보낸다., 완료되었음을 Spring Server에 알리고 isReady를 True로 바꾼다. <br>
      */
-    @Transactional
+
+    // 임시방편 : Isolation Level을 SERIALIZABLE로. Race Condition 문제 해결
+    // TODO : Redis 등으로 대체 필요
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     public LearnMeRegisterResponseDto sendToRequestTweetQueue(OAuthToken RequestUserOAuthToken) throws JsonProcessingException {
         queueUserRequestDto requestDto = queueUserRequestDto.builder()
                 .finished("spring_request_fetch_tweet")
