@@ -2,9 +2,7 @@ package com.lemondouble.lemonToolbox.api.service;
 
 import com.amazonaws.services.sqs.AmazonSQS;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.lemondouble.lemonToolbox.api.repository.ServiceCountRepository;
 import com.lemondouble.lemonToolbox.api.repository.entity.OAuthToken;
-import com.lemondouble.lemonToolbox.api.repository.entity.ServiceCount;
 import com.lemondouble.lemonToolbox.config.LocalStackSqsConfig;
 import com.lemondouble.lemonToolbox.config.RedisTestContainerInitializer;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,7 +14,6 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.ArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -35,13 +32,12 @@ class SqsMessageServiceTest {
     SqsMessageService sqsMessageService;
 
     @Autowired
-    ServiceCountRepository serviceCountRepository;
+    RedisLearnMeCountService redisLearnMeCountService;
 
     @BeforeEach
     @Transactional
     void init(){
         amazonSQS.createQueue("TweetGetRequestQueue");
-
     }
 
 
@@ -64,8 +60,9 @@ class SqsMessageServiceTest {
     // 한명은 깍두기
     @Test
     @Transactional
-    public void sendMessage_301번이후_실패() throws JsonProcessingException, InterruptedException {
+    public void sendMessage_300번이후_실패() throws JsonProcessingException, InterruptedException {
         //given
+        redisLearnMeCountService.setServiceCountToZero();
 
         //when
         OAuthToken token = OAuthToken.builder()
@@ -73,7 +70,7 @@ class SqsMessageServiceTest {
                 .accessTokenSecret("SECRET")
                 .oauthUserId(77777L).build();
 
-        int numberOfExcute = 301;
+        int numberOfExcute = 300;
         ExecutorService service = Executors.newFixedThreadPool(10);
         CountDownLatch latch = new CountDownLatch(numberOfExcute);
 
@@ -96,6 +93,11 @@ class SqsMessageServiceTest {
         assertThrows(ResponseStatusException.class, ()->{
             sqsMessageService.sendToRequestTweetQueue(token);
         });
+        assertThrows(ResponseStatusException.class, ()->{
+            sqsMessageService.sendToRequestTweetQueue(token);
+        });
+
+        assertEquals(302, redisLearnMeCountService.getCurrentServiceCount());
 ;
     }
 }

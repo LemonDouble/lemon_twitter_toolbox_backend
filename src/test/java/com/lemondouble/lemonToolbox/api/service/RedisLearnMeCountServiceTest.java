@@ -3,6 +3,7 @@ package com.lemondouble.lemonToolbox.api.service;
 import com.lemondouble.lemonToolbox.api.repository.entity.OAuthToken;
 import com.lemondouble.lemonToolbox.config.LocalStackSqsConfig;
 import com.lemondouble.lemonToolbox.config.RedisTestContainerInitializer;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,8 +25,8 @@ class RedisLearnMeCountServiceTest {
     @Autowired
     RedisLearnMeCountService redisLearnMeCountService;
 
-    @BeforeEach
-    public void init(){
+    @AfterEach
+    public void clear(){
         redisLearnMeCountService.setServiceCountToZero();
     }
 

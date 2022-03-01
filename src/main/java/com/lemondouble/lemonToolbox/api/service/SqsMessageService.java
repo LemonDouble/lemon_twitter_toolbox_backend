@@ -11,10 +11,8 @@ import com.lemondouble.lemonToolbox.api.dto.sqs.queueUserRequestDto;
 import com.lemondouble.lemonToolbox.api.dto.sqs.queueNotificationRequestDto;
 import com.lemondouble.lemonToolbox.api.repository.OAuthTokenRepository;
 import com.lemondouble.lemonToolbox.api.repository.RegisteredServiceRepository;
-import com.lemondouble.lemonToolbox.api.repository.ServiceCountRepository;
 import com.lemondouble.lemonToolbox.api.repository.entity.OAuthToken;
 import com.lemondouble.lemonToolbox.api.repository.entity.RegisteredService;
-import com.lemondouble.lemonToolbox.api.repository.entity.ServiceCount;
 import com.lemondouble.lemonToolbox.api.repository.entity.ServiceUser;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -35,7 +33,7 @@ public class SqsMessageService {
 
     private final QueueMessagingTemplate queueMessagingTemplate;
     private final ObjectMapper objectMapper;
-    private final ServiceCountRepository serviceCountRepository;
+    private final RedisLearnMeCountService redisLearnMeCountService;
     private final OAuthTokenRepository oAuthTokenRepository;
     private final RegisteredServiceRepository registeredServiceRepository;
 
@@ -45,11 +43,11 @@ public class SqsMessageService {
     private Long LEARNME_LIMIT;
 
     public SqsMessageService(AmazonSQS amazonSQS,
-                             ServiceCountRepository serviceCountRepository,
+                             RedisLearnMeCountService redisLearnMeCountService,
                              OAuthTokenRepository oAuthTokenRepository,
                              RegisteredServiceRepository registeredServiceRepository) {
         this.queueMessagingTemplate = new QueueMessagingTemplate((AmazonSQSAsync) amazonSQS);
-        this.serviceCountRepository = serviceCountRepository;
+        this.redisLearnMeCountService = redisLearnMeCountService;
         this.oAuthTokenRepository = oAuthTokenRepository;
         this.registeredServiceRepository = registeredServiceRepository;
         // SQS 메세지 보낼때는 Snake Case로 보낸다.
@@ -82,20 +80,16 @@ public class SqsMessageService {
         Message<String> message = dtoToMessage(requestDto);
 
         // serviceCountRepository 의 1번 entity : Learn-Me count
-        ServiceCount learnmeCount = serviceCountRepository.findByServiceCountForUpdate("LEARNME")
-                .orElseThrow(() -> {throw new RuntimeException("LEARNME 카운트가 없습니다!");});
+        Long increasedCount = redisLearnMeCountService.increaseAndGetServiceCount();
 
-        if(learnmeCount.getCount() > LEARNME_LIMIT){
+        if(increasedCount > LEARNME_LIMIT){
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "오늘 사용가능한 사람 수를 넘었습니다!");
         }
 
         queueMessagingTemplate.send("TweetGetRequestQueue", message);
 
-        learnmeCount.setCount(learnmeCount.getCount()+1);
-        serviceCountRepository.save(learnmeCount);
-
         return LearnMeRegisterResponseDto.builder()
-                .registerCount(learnmeCount.getCount()).registerLimit(LEARNME_LIMIT).build();
+                .registerCount(increasedCount).registerLimit(LEARNME_LIMIT).build();
     }
 
     public void sendToTweetNotificationQueue(OAuthToken RequestUserOAuthToken) throws JsonProcessingException {
