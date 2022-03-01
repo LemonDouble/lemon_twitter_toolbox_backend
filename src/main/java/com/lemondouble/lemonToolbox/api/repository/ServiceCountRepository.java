@@ -15,7 +15,7 @@ import java.util.Optional;
 
 public interface ServiceCountRepository extends JpaRepository<ServiceCount, String> {
 
-    @Lock(LockModeType.PESSIMISTIC_READ)
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query(value = "select s from ServiceCount s where s.ServiceName = :serviceName")
     Optional<ServiceCount> findByServiceCountForUpdate(@Param("serviceName") String serviceName);
 }
