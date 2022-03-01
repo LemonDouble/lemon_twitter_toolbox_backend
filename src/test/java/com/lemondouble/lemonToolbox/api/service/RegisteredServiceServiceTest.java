@@ -6,9 +6,11 @@ import com.lemondouble.lemonToolbox.api.repository.entity.RegisteredService;
 import com.lemondouble.lemonToolbox.api.repository.entity.ServiceType;
 import com.lemondouble.lemonToolbox.api.repository.entity.ServiceUser;
 import com.lemondouble.lemonToolbox.config.LocalStackSqsConfig;
+import com.lemondouble.lemonToolbox.config.RedisTestContainerInitializer;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -16,6 +18,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = LocalStackSqsConfig.class)
+@ContextConfiguration(initializers = {RedisTestContainerInitializer.class})
 @Transactional
 class RegisteredServiceServiceTest {
 

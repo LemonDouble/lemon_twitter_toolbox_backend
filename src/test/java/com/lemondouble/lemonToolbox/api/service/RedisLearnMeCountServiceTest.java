@@ -1,10 +1,6 @@
 package com.lemondouble.lemonToolbox.api.service;
 
-import com.amazonaws.services.sqs.AmazonSQS;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.lemondouble.lemonToolbox.api.repository.ServiceCountRepository;
 import com.lemondouble.lemonToolbox.api.repository.entity.OAuthToken;
-import com.lemondouble.lemonToolbox.api.repository.entity.ServiceCount;
 import com.lemondouble.lemonToolbox.config.LocalStackSqsConfig;
 import com.lemondouble.lemonToolbox.config.RedisTestContainerInitializer;
 import org.junit.jupiter.api.BeforeEach;
@@ -13,67 +9,33 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.ArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = LocalStackSqsConfig.class)
 @ContextConfiguration(initializers = {RedisTestContainerInitializer.class})
-class SqsMessageServiceTest {
+class RedisLearnMeCountServiceTest {
 
     @Autowired
-    AmazonSQS amazonSQS;
-
-    @Autowired
-    SqsMessageService sqsMessageService;
-
-    @Autowired
-    ServiceCountRepository serviceCountRepository;
+    RedisLearnMeCountService redisLearnMeCountService;
 
     @BeforeEach
-    @Transactional
-    void init(){
-        amazonSQS.createQueue("TweetGetRequestQueue");
-
+    public void init(){
+        redisLearnMeCountService.setServiceCountToZero();
     }
 
-
     @Test
-    @Transactional
-    public void sendMessage_성공() throws JsonProcessingException {
-
-        //given
-
-        OAuthToken token = OAuthToken.builder()
-                .accessToken("TOKEN")
-                .accessTokenSecret("SECRET")
-                .oauthUserId(77777L).build();
-        //when
-
-        //then
-        sqsMessageService.sendToRequestTweetQueue(token);
-    }
-
-    // 한명은 깍두기
-    @Test
-    @Transactional
-    public void sendMessage_301번이후_실패() throws JsonProcessingException, InterruptedException {
+    public void Thread_Safe확인() throws InterruptedException {
         //given
 
         //when
-        OAuthToken token = OAuthToken.builder()
-                .accessToken("TOKEN")
-                .accessTokenSecret("SECRET")
-                .oauthUserId(77777L).build();
 
-        int numberOfExcute = 301;
+        int numberOfExcute = 300;
         ExecutorService service = Executors.newFixedThreadPool(10);
         CountDownLatch latch = new CountDownLatch(numberOfExcute);
 
@@ -81,7 +43,7 @@ class SqsMessageServiceTest {
         for (int i = 0; i < numberOfExcute; i++) {
             service.execute(() -> {
                 try {
-                    sqsMessageService.sendToRequestTweetQueue(token);
+                    redisLearnMeCountService.increaseAndGetServiceCount();
                 } catch (ObjectOptimisticLockingFailureException oe) {
                     System.out.println("oe = " + oe.toString());
                 } catch (Exception e) {
@@ -93,9 +55,36 @@ class SqsMessageServiceTest {
         latch.await();
 
         //then
-        assertThrows(ResponseStatusException.class, ()->{
-            sqsMessageService.sendToRequestTweetQueue(token);
-        });
-;
+        assertEquals(300, redisLearnMeCountService.getCurrentServiceCount());
+    }
+
+    @Test
+    public void increaseAndGetServiceCount_성공(){
+        //given
+
+        //when
+        for(int i = 0; i < 10; i++){
+            redisLearnMeCountService.increaseAndGetServiceCount();
+        }
+
+        //then
+        assertEquals(10,redisLearnMeCountService.getCurrentServiceCount());
+    }
+
+    @Test
+    public void getServiceCount_반복사용(){
+        //given
+        for(int i = 0; i < 10; i++){
+            redisLearnMeCountService.increaseAndGetServiceCount();
+        }
+
+        //when
+        assertEquals(10,redisLearnMeCountService.getCurrentServiceCount());
+        assertEquals(10,redisLearnMeCountService.getCurrentServiceCount());
+        assertEquals(10,redisLearnMeCountService.getCurrentServiceCount());
+        assertEquals(10,redisLearnMeCountService.getCurrentServiceCount());
+        assertEquals(10,redisLearnMeCountService.getCurrentServiceCount());
+
+        //then
     }
 }

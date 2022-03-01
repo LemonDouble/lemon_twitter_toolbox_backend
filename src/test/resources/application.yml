@@ -1,9 +1,6 @@
 spring:
   profiles:
-    default: test # default env : dev
-  redis:
-    host: localhost
-    port: 6379
+    default: test # default env : test
 
   main:
     allow-bean-definition-overriding: true
