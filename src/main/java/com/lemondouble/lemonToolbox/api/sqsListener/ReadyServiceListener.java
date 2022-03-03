@@ -40,22 +40,36 @@ public class ReadyServiceListener {
      * SQS에서 서비스 처리 완료되었다는 메세지가 들어오면, DB에 해당 서비스를 isReady = true로 변경한다.
      */
     @SqsListener(value = "ServiceReadyQueue", deletionPolicy = SqsMessageDeletionPolicy.NEVER)
+    @Transactional
     public void listen(String payload, @Headers Map<String, String> headers, Acknowledgment ack) throws JsonProcessingException {
         try{
             // 받아온 JSON String을 Dto로 Mapping
             ObjectMapper mapper = new ObjectMapper().setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE);
-            ServiceReadyResponseDto[] serviceReadyResponseDtoArray
-                    = mapper.readValue(payload, ServiceReadyResponseDto[].class);
+            ServiceReadyResponseDto serviceReadyResponseDto
+                    = mapper.readValue(payload, ServiceReadyResponseDto.class);
             log.debug("ReadyServiceListener : JSON Convert Complete");
+            log.debug("ReadyServiceListener data : {}", serviceReadyResponseDto.toString());
+            List<OAuthToken> oauthToken = oAuthTokenRepository.findByOauthTypeAndOauthUserId(
+                    serviceReadyResponseDto.getOAuthType(),
+                    serviceReadyResponseDto.getOAuthUserId()
+            );
+            ServiceUser serviceUser = oauthToken.get(0).getServiceUser();
+            log.debug("ReadyServiceListener : Get Service User Complete");
 
-            for (ServiceReadyResponseDto serviceReadyResponseDto : serviceReadyResponseDtoArray) {
-                sqsMessageService.processingServiceReadyResponseDto(serviceReadyResponseDto);
-            }
+            RegisteredService registeredService = registeredServiceRepository.findByServiceUserAndServiceType(
+                    serviceUser,
+                    serviceReadyResponseDto.getServiceName()
+            ).get(0);
+
+            registeredService.setReady(true);
+            log.debug("ReadyServiceListener : set registeredService Ready = true Complete");
+
+            sqsMessageService.sendToTweetNotificationQueue(oauthToken.get(0));
+            log.debug("ReadyServiceListener : sendToTweetNotificationQueue = Complete");
 
             ack.acknowledge();
         }catch(Exception e){
             log.error("ReadyServiceListener : Processing Failed {}" , e.toString());
         }
     }
-
 }
