@@ -28,7 +28,7 @@ public class RegisteredServiceService {
      * 만약 이미 가입되어 있다면 가입된 채로 내버려 두고, <br>
      * 가입되어 있지 않다면, 새로 가입시킨다.
      */
-    @Transactional(isolation = Isolation.SERIALIZABLE)
+    @Transactional
     public void joinLearnMe(Long userId){
         ServiceUser serviceUser = getServiceUserByUserId(userId);
 

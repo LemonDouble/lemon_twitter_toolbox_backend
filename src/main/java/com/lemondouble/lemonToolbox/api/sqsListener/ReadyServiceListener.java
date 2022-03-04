@@ -53,6 +53,7 @@ public class ReadyServiceListener {
                     serviceReadyResponseDto.getOAuthType(),
                     serviceReadyResponseDto.getOAuthUserId()
             );
+
             ServiceUser serviceUser = oauthToken.get(0).getServiceUser();
             log.debug("ReadyServiceListener : Get Service User Complete");
 
