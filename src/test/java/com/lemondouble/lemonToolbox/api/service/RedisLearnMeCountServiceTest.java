@@ -33,7 +33,7 @@ class RedisLearnMeCountServiceTest {
     @Test
     public void Thread_Safe확인() throws InterruptedException {
         //given
-
+        redisLearnMeCountService.setServiceCountToZero();
         //when
 
         int numberOfExcute = 300;
@@ -62,6 +62,7 @@ class RedisLearnMeCountServiceTest {
     @Test
     public void increaseAndGetServiceCount_성공(){
         //given
+        redisLearnMeCountService.setServiceCountToZero();
 
         //when
         for(int i = 0; i < 10; i++){
@@ -75,6 +76,7 @@ class RedisLearnMeCountServiceTest {
     @Test
     public void getServiceCount_반복사용(){
         //given
+        redisLearnMeCountService.setServiceCountToZero();
         for(int i = 0; i < 10; i++){
             redisLearnMeCountService.increaseAndGetServiceCount();
         }
