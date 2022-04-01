@@ -37,6 +37,7 @@ public class RedisLearnMeCountService {
         }
     }
 
+    // Test용 메소드
     public void setServiceCountToZero(){
         try{
             valueOperations.set(key, "0");

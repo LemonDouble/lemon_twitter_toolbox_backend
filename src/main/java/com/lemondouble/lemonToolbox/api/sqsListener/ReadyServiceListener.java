@@ -38,6 +38,7 @@ public class ReadyServiceListener {
 
     /**
      * SQS에서 서비스 처리 완료되었다는 메세지가 들어오면, DB에 해당 서비스를 isReady = true로 변경한다.
+     * 이후 Tweet Notification Queue에 메세지 보내 완료되었다는 Tweet 보내도록 한다.
      */
     @SqsListener(value = "ServiceReadyQueue", deletionPolicy = SqsMessageDeletionPolicy.NEVER)
     @Transactional

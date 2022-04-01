@@ -37,8 +37,6 @@ public class SqsMessageService {
     private final OAuthTokenRepository oAuthTokenRepository;
     private final RegisteredServiceRepository registeredServiceRepository;
 
-    private Long count = 0L;
-
     @Value("${service-limit.learnme}")
     private Long LEARNME_LIMIT;
 
@@ -66,8 +64,6 @@ public class SqsMessageService {
      * 5. 작업 완료 알람을 보내고 트위터에 알람을 보낸다., 완료되었음을 Spring Server에 알리고 isReady를 True로 바꾼다. <br>
      */
 
-    // 임시방편 : Isolation Level을 SERIALIZABLE로. Race Condition 문제 해결
-    // TODO : Redis 등으로 대체 필요
     @Transactional(isolation = Isolation.SERIALIZABLE)
     public LearnMeRegisterResponseDto sendToRequestTweetQueue(OAuthToken RequestUserOAuthToken) throws JsonProcessingException {
         queueUserRequestDto requestDto = queueUserRequestDto.builder()
@@ -79,7 +75,6 @@ public class SqsMessageService {
 
         Message<String> message = dtoToMessage(requestDto);
 
-        // serviceCountRepository 의 1번 entity : Learn-Me count
         Long increasedCount = redisLearnMeCountService.increaseAndGetServiceCount();
 
         if(increasedCount > LEARNME_LIMIT){
@@ -118,8 +113,7 @@ public class SqsMessageService {
     @Transactional
     public void processingServiceReadyResponseDto(ServiceReadyResponseDto serviceReadyResponseDto){
         try{
-            count++;
-            log.debug("processing Count : {}", count);
+
             log.debug("ReadyServiceListener data : {}", serviceReadyResponseDto.toString());
             List<OAuthToken> oauthToken = oAuthTokenRepository.findByOauthTypeAndOauthUserId(
                     serviceReadyResponseDto.getOAuthType(),
