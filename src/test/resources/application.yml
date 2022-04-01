@@ -63,4 +63,4 @@ cloud:
       auto: false
 
 service-limit:
-  learnme: 300
+  learnme: 400

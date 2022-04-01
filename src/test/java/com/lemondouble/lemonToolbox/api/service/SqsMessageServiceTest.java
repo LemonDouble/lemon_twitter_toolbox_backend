@@ -38,6 +38,7 @@ class SqsMessageServiceTest {
     @Transactional
     void init(){
         amazonSQS.createQueue("TweetGetRequestQueue");
+        redisLearnMeCountService.setServiceCountToZero();
     }
 
 
@@ -57,10 +58,9 @@ class SqsMessageServiceTest {
         sqsMessageService.sendToRequestTweetQueue(token);
     }
 
-    // 한명은 깍두기
     @Test
     @Transactional
-    public void sendMessage_300번이후_실패() throws JsonProcessingException, InterruptedException {
+    public void sendMessage_400번이후_실패() throws JsonProcessingException, InterruptedException {
         //given
         redisLearnMeCountService.setServiceCountToZero();
 
@@ -70,7 +70,7 @@ class SqsMessageServiceTest {
                 .accessTokenSecret("SECRET")
                 .oauthUserId(77777L).build();
 
-        int numberOfExcute = 300;
+        int numberOfExcute = 400;
         ExecutorService service = Executors.newFixedThreadPool(10);
         CountDownLatch latch = new CountDownLatch(numberOfExcute);
 
@@ -97,7 +97,7 @@ class SqsMessageServiceTest {
             sqsMessageService.sendToRequestTweetQueue(token);
         });
 
-        assertEquals(302, redisLearnMeCountService.getCurrentServiceCount());
+        assertEquals(numberOfExcute+2, redisLearnMeCountService.getCurrentServiceCount());
 ;
     }
 }
